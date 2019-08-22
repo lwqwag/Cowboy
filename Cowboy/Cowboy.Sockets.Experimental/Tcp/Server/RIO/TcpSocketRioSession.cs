@@ -50,7 +50,7 @@ namespace Cowboy.Sockets.Experimental
             _server = server ?? throw new ArgumentNullException("server");
 
             _sessionKey = Guid.NewGuid().ToString();
-            this.StartTime = DateTime.UtcNow;
+            StartTime = DateTime.UtcNow;
 
             if (_receiveBuffer == default(ArraySegment<byte>))
                 _receiveBuffer = _bufferManager.BorrowBuffer();
@@ -93,7 +93,7 @@ namespace Cowboy.Sockets.Experimental
         public override string ToString()
         {
             return string.Format("SessionKey[{0}]",
-                this.SessionKey);
+                SessionKey);
         }
 
         #endregion
@@ -125,9 +125,9 @@ namespace Cowboy.Sockets.Experimental
                 }
 
                 Log.DebugFormat("Session started on [{0}] in dispatcher [{1}] with session count [{2}].",
-                    this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
+                    StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _dispatcher.GetType().Name,
-                    this.Server.SessionCount);
+                    Server.SessionCount);
                 bool isErrorOccurredInUserSide = false;
                 try
                 {
@@ -241,7 +241,7 @@ namespace Cowboy.Sockets.Experimental
             Log.DebugFormat("Session closed on [{0}] in dispatcher [{1}] with session count [{2}].",
                 DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                 _dispatcher.GetType().Name,
-                this.Server.SessionCount - 1);
+                Server.SessionCount - 1);
             try
             {
                 await _dispatcher.OnSessionClosed(this);
@@ -260,18 +260,12 @@ namespace Cowboy.Sockets.Experimental
             {
                 try
                 {
-                    if (_stream != null)
-                    {
-                        _stream.Dispose();
-                    }
+                    _stream?.Dispose();
                 }
                 catch { }
                 try
                 {
-                    if (_socket != null)
-                    {
-                        _socket.Dispose();
-                    }
+                    _socket?.Dispose();
                 }
                 catch { }
             }

@@ -152,7 +152,7 @@ namespace Cowboy.Sockets
         public override string ToString()
         {
             return string.Format("RemoteEndPoint[{0}], LocalEndPoint[{1}]",
-                this.RemoteEndPoint, this.LocalEndPoint);
+                RemoteEndPoint, LocalEndPoint);
         }
 
         #endregion
@@ -205,7 +205,7 @@ namespace Cowboy.Sockets
                 }
 
                 Log.DebugFormat("Connected to server [{0}] with dispatcher [{1}] on [{2}].",
-                    this.RemoteEndPoint,
+                    RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
                 bool isErrorOccurredInUserSide = false;
@@ -355,7 +355,7 @@ namespace Cowboy.Sockets
                         return true;
                     else
                         Log.ErrorFormat("Error occurred when validating remote certificate: [{0}], [{1}].",
-                            this.RemoteEndPoint, sslPolicyErrors);
+                            RemoteEndPoint, sslPolicyErrors);
 
                     return false;
                 });
@@ -424,7 +424,7 @@ namespace Cowboy.Sockets
             if (shallNotifyUserSide)
             {
                 Log.DebugFormat("Disconnected from server [{0}] with dispatcher [{1}] on [{2}].",
-                    this.RemoteEndPoint,
+                    RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
                 try
@@ -458,18 +458,12 @@ namespace Cowboy.Sockets
             {
                 try
                 {
-                    if (_stream != null)
-                    {
-                        _stream.Dispose();
-                    }
+                    _stream?.Dispose();
                 }
                 catch { }
                 try
                 {
-                    if (_tcpClient != null)
-                    {
-                        _tcpClient.Close();
-                    }
+                    _tcpClient?.Close();
                 }
                 catch { }
             }

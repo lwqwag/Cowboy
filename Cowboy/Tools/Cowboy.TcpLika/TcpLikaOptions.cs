@@ -64,11 +64,11 @@ namespace Cowboy.TcpLika
         {
             var singleOptionList = new List<string>();
 
-            singleOptionList.AddRange(TcpLikaOptions.SslOptions);
-            singleOptionList.AddRange(TcpLikaOptions.SslBypassedErrorsOptions);
+            singleOptionList.AddRange(SslOptions);
+            singleOptionList.AddRange(SslBypassedErrorsOptions);
 
-            singleOptionList.AddRange(TcpLikaOptions.HelpOptions);
-            singleOptionList.AddRange(TcpLikaOptions.VersionOptions);
+            singleOptionList.AddRange(HelpOptions);
+            singleOptionList.AddRange(VersionOptions);
 
             return singleOptionList;
         }

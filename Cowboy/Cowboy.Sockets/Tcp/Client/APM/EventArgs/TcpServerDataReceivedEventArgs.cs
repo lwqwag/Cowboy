@@ -24,7 +24,7 @@ namespace Cowboy.Sockets
 
         public override string ToString()
         {
-            return string.Format("{0}", this.Client);
+            return string.Format("{0}", Client);
         }
     }
 }

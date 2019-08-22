@@ -12,8 +12,8 @@ namespace Cowboy.Sockets
 
         public TcpServerConnectedEventArgs(IPEndPoint remoteEp, IPEndPoint localEp)
         {
-            this.RemoteEndPoint = remoteEp ?? throw new ArgumentNullException("remoteEp");
-            this.LocalEndPoint = localEp;
+            RemoteEndPoint = remoteEp ?? throw new ArgumentNullException("remoteEp");
+            LocalEndPoint = localEp;
         }
 
         public IPEndPoint RemoteEndPoint { get; private set; }
@@ -21,7 +21,7 @@ namespace Cowboy.Sockets
 
         public override string ToString()
         {
-            return this.RemoteEndPoint.ToString();
+            return RemoteEndPoint.ToString();
         }
     }
 }

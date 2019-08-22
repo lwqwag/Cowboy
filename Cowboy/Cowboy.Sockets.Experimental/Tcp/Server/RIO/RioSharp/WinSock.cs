@@ -655,8 +655,8 @@ namespace Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp
             var result = setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char*)&True, 4);
             if (result != 0)
             {
-                var error = WinSock.WSAGetLastError();
-                WinSock.WSACleanup();
+                var error = WSAGetLastError();
+                WSACleanup();
                 throw new Exception(String.Format("ERROR: setsockopt TCP_NODELAY returned {0}", error));
             }
 
@@ -666,8 +666,8 @@ namespace Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp
 
             if (result != 0)
             {
-                var error = WinSock.WSAGetLastError();
-                WinSock.WSACleanup();
+                var error = WSAGetLastError();
+                WSACleanup();
                 throw new Exception(String.Format("ERROR: WSAIoctl SIO_LOOPBACK_FAST_PATH returned {0}", error));
             }
 
@@ -678,8 +678,8 @@ namespace Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp
 
             if (result != 0)
             {
-                var error = WinSock.WSAGetLastError();
-                WinSock.WSACleanup();
+                var error = WSAGetLastError();
+                WSACleanup();
                 throw new Exception(String.Format("ERROR: RIOInitalize returned {0}", error));
             }
             else
@@ -775,7 +775,7 @@ namespace Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp
 
         internal static int ThrowLastWSAError()
         {
-            var error = WinSock.WSAGetLastError();
+            var error = WSAGetLastError();
         
             if (error != 0 && error != 997)
             {

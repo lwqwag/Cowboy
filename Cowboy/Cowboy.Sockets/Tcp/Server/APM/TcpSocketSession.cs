@@ -48,12 +48,12 @@ namespace Cowboy.Sockets.Tcp.Server.APM
             _server = server ?? throw new ArgumentNullException("server");
 
             _sessionKey = Guid.NewGuid().ToString();
-            this.StartTime = DateTime.UtcNow;
+            StartTime = DateTime.UtcNow;
 
             SetSocketOptions();
 
-            _remoteEndPoint = this.RemoteEndPoint;
-            _localEndPoint = this.LocalEndPoint;
+            _remoteEndPoint = RemoteEndPoint;
+            _localEndPoint = LocalEndPoint;
         }
 
         #endregion
@@ -95,7 +95,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
         public override string ToString()
         {
             return string.Format("SessionKey[{0}], RemoteEndPoint[{1}], LocalEndPoint[{2}]",
-                this.SessionKey, this.RemoteEndPoint, this.LocalEndPoint);
+                SessionKey, RemoteEndPoint, LocalEndPoint);
         }
 
         #endregion
@@ -203,18 +203,12 @@ namespace Cowboy.Sockets.Tcp.Server.APM
             {
                 try
                 {
-                    if (_stream != null)
-                    {
-                        _stream.Dispose();
-                    }
+                    _stream?.Dispose();
                 }
                 catch { }
                 try
                 {
-                    if (_tcpClient != null)
-                    {
-                        _tcpClient.Close();
-                    }
+                    _tcpClient?.Close();
                 }
                 catch { }
             }
@@ -270,7 +264,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
                         return true;
                     else
                         Log.ErrorFormat("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
-                            this, this.RemoteEndPoint, sslPolicyErrors);
+                            this, RemoteEndPoint, sslPolicyErrors);
 
                     return false;
                 });
@@ -302,7 +296,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
             {
                 Close(false); // ssl negotiation timeout
                 throw new TimeoutException(string.Format(
-                    "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", this.RemoteEndPoint, ConnectTimeout));
+                    "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", RemoteEndPoint, ConnectTimeout));
             }
 
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
@@ -595,10 +589,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
         {
             try
             {
-                if (_stream != null)
-                {
-                    _stream.EndWrite(ar);
-                }
+                _stream?.EndWrite(ar);
             }
             catch (Exception ex)
             {

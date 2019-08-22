@@ -35,7 +35,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
 
         public TcpSocketServer(IPEndPoint listenedEndPoint, TcpSocketServerConfiguration configuration = null)
         {
-            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
             _configuration = configuration ?? new TcpSocketServerConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -63,7 +63,7 @@ namespace Cowboy.Sockets.Tcp.Server.APM
                 if (_isListening)
                     return;
 
-                _listener = new TcpListener(this.ListenedEndPoint);
+                _listener = new TcpListener(ListenedEndPoint);
                 SetSocketOptions();
 
                 _isListening = true;

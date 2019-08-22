@@ -12,9 +12,9 @@ namespace Cowboy.Sockets
 
         public LineDelimiter(string delimiter)
         {
-            this.DelimiterString = delimiter;
-            this.DelimiterChars = this.DelimiterString.ToCharArray();
-            this.DelimiterBytes = Encoding.UTF8.GetBytes(this.DelimiterChars);
+            DelimiterString = delimiter;
+            DelimiterChars = DelimiterString.ToCharArray();
+            DelimiterBytes = Encoding.UTF8.GetBytes(DelimiterChars);
         }
 
         public string DelimiterString { get; private set; }
@@ -23,25 +23,25 @@ namespace Cowboy.Sockets
 
         public bool Equals(LineDelimiter other)
         {
-            if (Object.ReferenceEquals(other, null)) return false;
-            if (Object.ReferenceEquals(this, other)) return true;
+            if (ReferenceEquals(other, null)) return false;
+            if (ReferenceEquals(this, other)) return true;
 
-            return (StringComparer.OrdinalIgnoreCase.Compare(this.DelimiterString, other.DelimiterString) == 0);
+            return (StringComparer.OrdinalIgnoreCase.Compare(DelimiterString, other.DelimiterString) == 0);
         }
 
         public override bool Equals(object obj)
         {
-            return this.Equals(obj as LineDelimiter);
+            return Equals(obj as LineDelimiter);
         }
 
         public override int GetHashCode()
         {
-            return this.DelimiterString.GetHashCode();
+            return DelimiterString.GetHashCode();
         }
 
         public override string ToString()
         {
-            return this.DelimiterString;
+            return DelimiterString;
         }
     }
 

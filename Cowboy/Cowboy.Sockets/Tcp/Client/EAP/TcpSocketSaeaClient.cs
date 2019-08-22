@@ -179,7 +179,7 @@ namespace Cowboy.Sockets
         public override string ToString()
         {
             return string.Format("RemoteEndPoint[{0}], LocalEndPoint[{1}]",
-                this.RemoteEndPoint, this.LocalEndPoint);
+                RemoteEndPoint, LocalEndPoint);
         }
 
         #endregion
@@ -228,7 +228,7 @@ namespace Cowboy.Sockets
                 }
 
                 Log.DebugFormat("Connected to server [{0}] with dispatcher [{1}] on [{2}].",
-                    this.RemoteEndPoint,
+                    RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
                 bool isErrorOccurredInUserSide = false;
@@ -384,7 +384,7 @@ namespace Cowboy.Sockets
             if (shallNotifyUserSide)
             {
                 Log.DebugFormat("Disconnected from server [{0}] with dispatcher [{1}] on [{2}].",
-                    this.RemoteEndPoint,
+                    RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
                 try
@@ -416,8 +416,7 @@ namespace Cowboy.Sockets
         {
             try
             {
-                if (_socket != null)
-                    _socket.Dispose();
+                _socket?.Dispose();
             }
             catch { }
             finally
@@ -551,10 +550,8 @@ namespace Cowboy.Sockets
                 if (disposing)
                 {
                     // free managed objects here
-                    if (_socket != null)
-                        _socket.Dispose();
-                    if (_saeaPool != null)
-                        _saeaPool.Dispose();
+                    _socket?.Dispose();
+                    _saeaPool?.Dispose();
                 }
 
                 _isDisposed = true;

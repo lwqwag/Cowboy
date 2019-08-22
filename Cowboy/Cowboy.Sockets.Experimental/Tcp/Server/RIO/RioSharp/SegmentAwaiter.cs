@@ -74,8 +74,7 @@ namespace RioSharp
         {
             _currentValue?.Dispose();
             _currentValue = null;
-            if (_continuation != null)
-                _continuation();
+            _continuation?.Invoke();
         }
     }
 }

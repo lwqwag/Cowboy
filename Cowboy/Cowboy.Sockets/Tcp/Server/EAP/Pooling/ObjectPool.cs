@@ -59,11 +59,10 @@ namespace Cowboy.Sockets
                 if (disposing)
                 {
                     // free managed objects here
-                    for (int i = 0; i < this.Count; i++)
+                    for (int i = 0; i < Count; i++)
                     {
-                        var item = this.Take() as IDisposable;
-                        if (item != null)
-                            item.Dispose();
+                        var item = Take() as IDisposable;
+                        item?.Dispose();
                     }
                 }
 

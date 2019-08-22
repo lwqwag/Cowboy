@@ -41,7 +41,7 @@ namespace Cowboy.Sockets
         {
             byte[] buffer = null;
 
-            switch (this.LengthField)
+            switch (LengthField)
             {
                 case LengthField.OneByte:
                     {
@@ -123,7 +123,7 @@ namespace Cowboy.Sockets
             byte[] output = null;
             long length = 0;
 
-            switch (this.LengthField)
+            switch (LengthField)
             {
                 case LengthField.OneByte:
                     {
@@ -197,7 +197,7 @@ namespace Cowboy.Sockets
             payloadOffset = 0;
             payloadCount = output.Length;
 
-            frameLength = (int)this.LengthField + output.Length;
+            frameLength = (int)LengthField + output.Length;
 
             return true;
         }

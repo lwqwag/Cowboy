@@ -12,7 +12,7 @@ namespace Cowboy.CommandLines
 
         protected CommandLine(string[] args)
         {
-            this.Arguments = new ReadOnlyCollection<string>(args);
+            Arguments = new ReadOnlyCollection<string>(args);
         }
 
         #endregion
@@ -62,10 +62,7 @@ namespace Cowboy.CommandLines
         protected virtual void RaiseCommandLineUsage(object sender, string usage)
         {
             EventHandler<CommandLineUsageEventArgs> handler = CommandLineUsage;
-            if (handler != null)
-            {
-                handler(sender, new CommandLineUsageEventArgs(usage));
-            }
+            handler?.Invoke(sender, new CommandLineUsageEventArgs(usage));
         }
 
         public event EventHandler<CommandLineDataChangedEventArgs> CommandLineDataChanged;
@@ -74,10 +71,7 @@ namespace Cowboy.CommandLines
         protected virtual void RaiseCommandLineDataChanged(object sender, string data)
         {
             EventHandler<CommandLineDataChangedEventArgs> handler = CommandLineDataChanged;
-            if (handler != null)
-            {
-                handler(sender, new CommandLineDataChangedEventArgs(data));
-            }
+            handler?.Invoke(sender, new CommandLineDataChangedEventArgs(data));
         }
 
         public event EventHandler<CommandLineExceptionEventArgs> CommandLineException;
@@ -86,10 +80,7 @@ namespace Cowboy.CommandLines
         protected virtual void RaiseCommandLineException(object sender, CommandLineException exception)
         {
             EventHandler<CommandLineExceptionEventArgs> handler = CommandLineException;
-            if (handler != null)
-            {
-                handler(sender, new CommandLineExceptionEventArgs(exception));
-            }
+            handler?.Invoke(sender, new CommandLineExceptionEventArgs(exception));
         }
 
         #endregion

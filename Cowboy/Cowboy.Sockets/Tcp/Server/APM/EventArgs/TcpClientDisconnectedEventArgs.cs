@@ -6,14 +6,14 @@ namespace Cowboy.Sockets.Tcp.Server.APM.EventArgs
     {
         public TcpClientDisconnectedEventArgs(TcpSocketSession session)
         {
-            this.Session = session ?? throw new ArgumentNullException("session");
+            Session = session ?? throw new ArgumentNullException("session");
         }
 
         public TcpSocketSession Session { get; private set; }
 
         public override string ToString()
         {
-            return string.Format("{0}", this.Session);
+            return string.Format("{0}", Session);
         }
     }
 }

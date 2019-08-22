@@ -46,7 +46,7 @@ namespace Cowboy.Sockets.Experimental
 
         public TcpSocketRioServer(IPEndPoint listenedEndPoint, ITcpSocketRioServerEventDispatcher dispatcher, TcpSocketRioServerConfiguration configuration = null)
         {
-            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
             _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new TcpSocketRioServerConfiguration();
 
@@ -137,7 +137,7 @@ namespace Cowboy.Sockets.Experimental
 
             try
             {
-                _listener.Listen(this.ListenedEndPoint, 1024 * 1024);
+                _listener.Listen(ListenedEndPoint, 1024 * 1024);
             }
             catch (Exception ex) when (!ShouldThrow(ex)) { }
         }

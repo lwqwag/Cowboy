@@ -25,7 +25,7 @@ namespace Cowboy.TcpLika
             base.Execute();
 
             var singleOptions = TcpLikaOptions.GetSingleOptions();
-            var getOptions = CommandLineParser.Parse(this.Arguments.ToArray<string>(), singleOptions.ToArray());
+            var getOptions = CommandLineParser.Parse(Arguments.ToArray<string>(), singleOptions.ToArray());
             _options = ParseOptions(getOptions);
             ValidateOptions(_options);
 
@@ -35,7 +35,7 @@ namespace Cowboy.TcpLika
             }
             else if (_options.IsSetVersion)
             {
-                RaiseCommandLineUsage(this, this.Version);
+                RaiseCommandLineUsage(this, Version);
             }
             else
             {

@@ -52,12 +52,12 @@ namespace Cowboy.Sockets
             _server = server ?? throw new ArgumentNullException("server");
 
             _sessionKey = Guid.NewGuid().ToString();
-            this.StartTime = DateTime.UtcNow;
+            StartTime = DateTime.UtcNow;
 
             SetSocketOptions();
 
-            _remoteEndPoint = this.RemoteEndPoint;
-            _localEndPoint = this.LocalEndPoint;
+            _remoteEndPoint = RemoteEndPoint;
+            _localEndPoint = LocalEndPoint;
         }
 
         #endregion
@@ -99,7 +99,7 @@ namespace Cowboy.Sockets
         public override string ToString()
         {
             return string.Format("SessionKey[{0}], RemoteEndPoint[{1}], LocalEndPoint[{2}]",
-                this.SessionKey, this.RemoteEndPoint, this.LocalEndPoint);
+                SessionKey, RemoteEndPoint, LocalEndPoint);
         }
 
         #endregion
@@ -125,7 +125,7 @@ namespace Cowboy.Sockets
                 {
                     await Close(false); // ssl negotiation timeout
                     throw new TimeoutException(string.Format(
-                        "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", this.RemoteEndPoint, ConnectTimeout));
+                        "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", RemoteEndPoint, ConnectTimeout));
                 }
                 _stream = negotiator.Result;
 
@@ -140,10 +140,10 @@ namespace Cowboy.Sockets
                 }
 
                 Log.DebugFormat("Session started for [{0}] on [{1}] in dispatcher [{2}] with session count [{3}].",
-                    this.RemoteEndPoint,
-                    this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
+                    RemoteEndPoint,
+                    StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _dispatcher.GetType().Name,
-                    this.Server.SessionCount);
+                    Server.SessionCount);
                 bool isErrorOccurredInUserSide = false;
                 try
                 {
@@ -286,7 +286,7 @@ namespace Cowboy.Sockets
                         return true;
                     else
                         Log.ErrorFormat("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
-                            this, this.RemoteEndPoint, sslPolicyErrors);
+                            this, RemoteEndPoint, sslPolicyErrors);
 
                     return false;
                 });
@@ -355,10 +355,10 @@ namespace Cowboy.Sockets
             if (shallNotifyUserSide)
             {
                 Log.DebugFormat("Session closed for [{0}] on [{1}] in dispatcher [{2}] with session count [{3}].",
-                    this.RemoteEndPoint,
+                    RemoteEndPoint,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _dispatcher.GetType().Name,
-                    this.Server.SessionCount - 1);
+                    Server.SessionCount - 1);
                 try
                 {
                     await _dispatcher.OnSessionClosed(this);
@@ -390,18 +390,12 @@ namespace Cowboy.Sockets
             {
                 try
                 {
-                    if (_stream != null)
-                    {
-                        _stream.Dispose();
-                    }
+                    _stream?.Dispose();
                 }
                 catch { }
                 try
                 {
-                    if (_tcpClient != null)
-                    {
-                        _tcpClient.Close();
-                    }
+                    _tcpClient?.Close();
                 }
                 catch { }
             }

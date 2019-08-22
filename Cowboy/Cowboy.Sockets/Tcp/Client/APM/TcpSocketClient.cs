@@ -93,7 +93,7 @@ namespace Cowboy.Sockets
         public override string ToString()
         {
             return string.Format("RemoteEndPoint[{0}], LocalEndPoint[{1}]",
-                this.RemoteEndPoint, this.LocalEndPoint);
+                RemoteEndPoint, LocalEndPoint);
         }
 
         #endregion
@@ -185,18 +185,12 @@ namespace Cowboy.Sockets
             {
                 try
                 {
-                    if (_stream != null)
-                    {
-                        _stream.Dispose();
-                    }
+                    _stream?.Dispose();
                 }
                 catch { }
                 try
                 {
-                    if (_tcpClient != null)
-                    {
-                        _tcpClient.Close();
-                    }
+                    _tcpClient?.Close();
                 }
                 catch { }
             }
@@ -296,7 +290,7 @@ namespace Cowboy.Sockets
                         return true;
                     else
                         Log.ErrorFormat("Error occurred when validating remote certificate: [{0}], [{1}].",
-                            this.RemoteEndPoint, sslPolicyErrors);
+                            RemoteEndPoint, sslPolicyErrors);
 
                     return false;
                 });
@@ -328,7 +322,7 @@ namespace Cowboy.Sockets
             {
                 Close(false); // ssl negotiation timeout
                 throw new TimeoutException(string.Format(
-                    "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", this.RemoteEndPoint, ConnectTimeout));
+                    "Negotiate SSL/TSL with remote [{0}] timeout [{1}].", RemoteEndPoint, ConnectTimeout));
             }
             sslStream.EndAuthenticateAsClient(ar);
 
@@ -374,7 +368,7 @@ namespace Cowboy.Sockets
 
         private void HandleDataReceived(IAsyncResult ar)
         {
-            if (this.State != TcpSocketConnectionState.Connected
+            if (State != TcpSocketConnectionState.Connected
                 || _stream == null)
             {
                 Close(false); // receive buffer callback
@@ -563,7 +557,7 @@ namespace Cowboy.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (this.State != TcpSocketConnectionState.Connected)
+            if (State != TcpSocketConnectionState.Connected)
             {
                 throw new InvalidProgramException("This client has not connected to server.");
             }
@@ -596,7 +590,7 @@ namespace Cowboy.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (this.State != TcpSocketConnectionState.Connected)
+            if (State != TcpSocketConnectionState.Connected)
             {
                 throw new InvalidProgramException("This client has not connected to server.");
             }
@@ -621,10 +615,7 @@ namespace Cowboy.Sockets
         {
             try
             {
-                if (_stream != null)
-                {
-                    _stream.EndWrite(ar);
-                }
+                _stream?.EndWrite(ar);
             }
             catch (Exception ex)
             {
@@ -651,7 +642,7 @@ namespace Cowboy.Sockets
         {
             BufferValidator.ValidateBuffer(data, offset, count, "data");
 
-            if (this.State != TcpSocketConnectionState.Connected)
+            if (State != TcpSocketConnectionState.Connected)
             {
                 throw new InvalidProgramException("This client has not connected to server.");
             }
@@ -687,26 +678,17 @@ namespace Cowboy.Sockets
 
         private void RaiseServerConnected()
         {
-            if (ServerConnected != null)
-            {
-                ServerConnected(this, new TcpServerConnectedEventArgs(this.RemoteEndPoint, this.LocalEndPoint));
-            }
+            ServerConnected?.Invoke(this, new TcpServerConnectedEventArgs(RemoteEndPoint, LocalEndPoint));
         }
 
         private void RaiseServerDisconnected()
         {
-            if (ServerDisconnected != null)
-            {
-                ServerDisconnected(this, new TcpServerDisconnectedEventArgs(_remoteEndPoint, _localEndPoint));
-            }
+            ServerDisconnected?.Invoke(this, new TcpServerDisconnectedEventArgs(_remoteEndPoint, _localEndPoint));
         }
 
         private void RaiseServerDataReceived(byte[] data, int dataOffset, int dataLength)
         {
-            if (ServerDataReceived != null)
-            {
-                ServerDataReceived(this, new TcpServerDataReceivedEventArgs(this, data, dataOffset, dataLength));
-            }
+            ServerDataReceived?.Invoke(this, new TcpServerDataReceivedEventArgs(this, data, dataOffset, dataLength));
         }
 
         #endregion

@@ -9,8 +9,8 @@ namespace Cowboy.TcpLika
     {
         public TcpLikaCommandLineOptions()
         {
-            this.RemoteEndPoints = new List<IPEndPoint>();
-            this.SslClientCertificates = new X509CertificateCollection();
+            RemoteEndPoints = new List<IPEndPoint>();
+            SslClientCertificates = new X509CertificateCollection();
         }
 
         public List<IPEndPoint> RemoteEndPoints { get; set; }    // Remote addresses to connect

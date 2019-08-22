@@ -15,7 +15,10 @@ namespace Cowboy.Sockets
 
         private static readonly ILog Log = Logger.Get<TcpSocketSaeaServer>();
         private static readonly byte[] EmptyArray = new byte[0];
-        private readonly ConcurrentDictionary<string, TcpSocketSaeaSession> _sessions = new ConcurrentDictionary<string, TcpSocketSaeaSession>();
+
+        private readonly ConcurrentDictionary<string, TcpSocketSaeaSession> _sessions =
+            new ConcurrentDictionary<string, TcpSocketSaeaSession>();
+
         private readonly TcpSocketSaeaServerConfiguration _configuration;
         private readonly ITcpSocketSaeaServerEventDispatcher _dispatcher;
 
@@ -36,19 +39,22 @@ namespace Cowboy.Sockets
 
         #region Constructors
 
-        public TcpSocketSaeaServer(int listenedPort, ITcpSocketSaeaServerEventDispatcher dispatcher, TcpSocketSaeaServerConfiguration configuration = null)
+        public TcpSocketSaeaServer(int listenedPort, ITcpSocketSaeaServerEventDispatcher dispatcher,
+            TcpSocketSaeaServerConfiguration configuration = null)
             : this(IPAddress.Any, listenedPort, dispatcher, configuration)
         {
         }
 
-        public TcpSocketSaeaServer(IPAddress listenedAddress, int listenedPort, ITcpSocketSaeaServerEventDispatcher dispatcher, TcpSocketSaeaServerConfiguration configuration = null)
+        public TcpSocketSaeaServer(IPAddress listenedAddress, int listenedPort,
+            ITcpSocketSaeaServerEventDispatcher dispatcher, TcpSocketSaeaServerConfiguration configuration = null)
             : this(new IPEndPoint(listenedAddress, listenedPort), dispatcher, configuration)
         {
         }
 
-        public TcpSocketSaeaServer(IPEndPoint listenedEndPoint, ITcpSocketSaeaServerEventDispatcher dispatcher, TcpSocketSaeaServerConfiguration configuration = null)
+        public TcpSocketSaeaServer(IPEndPoint listenedEndPoint, ITcpSocketSaeaServerEventDispatcher dispatcher,
+            TcpSocketSaeaServerConfiguration configuration = null)
         {
-            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
             _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new TcpSocketSaeaServerConfiguration();
 
@@ -76,7 +82,8 @@ namespace Cowboy.Sockets
             Func<TcpSocketSaeaSession, Task> onSessionStarted = null,
             Func<TcpSocketSaeaSession, Task> onSessionClosed = null,
             TcpSocketSaeaServerConfiguration configuration = null)
-            : this(new IPEndPoint(listenedAddress, listenedPort), onSessionDataReceived, onSessionStarted, onSessionClosed, configuration)
+            : this(new IPEndPoint(listenedAddress, listenedPort), onSessionDataReceived, onSessionStarted,
+                onSessionClosed, configuration)
         {
         }
 
@@ -87,72 +94,73 @@ namespace Cowboy.Sockets
             Func<TcpSocketSaeaSession, Task> onSessionClosed = null,
             TcpSocketSaeaServerConfiguration configuration = null)
             : this(listenedEndPoint,
-                  new DefaultTcpSocketSaeaServerEventDispatcher(onSessionDataReceived, onSessionStarted, onSessionClosed),
-                  configuration)
+                new DefaultTcpSocketSaeaServerEventDispatcher(onSessionDataReceived, onSessionStarted, onSessionClosed),
+                configuration)
         {
         }
 
         private void Initialize()
         {
             _acceptSaeaPool = new SaeaPool(
-                () =>
-                {
-                    var saea = new SaeaAwaitable();
-                    return saea;
-                },
-                (saea) =>
-                {
-                    try
+                    () =>
                     {
-                        saea.Saea.AcceptSocket = null;
-                        saea.Saea.SetBuffer(0, 0);
-                        saea.Saea.RemoteEndPoint = null;
-                        saea.Saea.SocketFlags = SocketFlags.None;
-                    }
-                    catch (Exception ex)
+                        var saea = new SaeaAwaitable();
+                        return saea;
+                    },
+                    (saea) =>
                     {
-                        Log.Error(ex.Message, ex);
-                    }
-                })
+                        try
+                        {
+                            saea.Saea.AcceptSocket = null;
+                            saea.Saea.SetBuffer(0, 0);
+                            saea.Saea.RemoteEndPoint = null;
+                            saea.Saea.SocketFlags = SocketFlags.None;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.Message, ex);
+                        }
+                    })
                 .Initialize(16);
             _handleSaeaPool = new SaeaPool(
-                () =>
-                {
-                    var saea = new SaeaAwaitable();
-                    return saea;
-                },
-                (saea) =>
-                {
-                    try
+                    () =>
                     {
-                        saea.Saea.AcceptSocket = null;
-                        saea.Saea.SetBuffer(EmptyArray, 0, 0);
-                        saea.Saea.RemoteEndPoint = null;
-                        saea.Saea.SocketFlags = SocketFlags.None;
-                    }
-                    catch (Exception ex)
+                        var saea = new SaeaAwaitable();
+                        return saea;
+                    },
+                    (saea) =>
                     {
-                        Log.Error(ex.Message, ex);
-                    }
-                })
+                        try
+                        {
+                            saea.Saea.AcceptSocket = null;
+                            saea.Saea.SetBuffer(EmptyArray, 0, 0);
+                            saea.Saea.RemoteEndPoint = null;
+                            saea.Saea.SocketFlags = SocketFlags.None;
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.Message, ex);
+                        }
+                    })
                 .Initialize(1024);
             _sessionPool = new SessionPool(
-                () =>
-                {
-                    var session = new TcpSocketSaeaSession(_configuration, _configuration.BufferManager, _handleSaeaPool, _dispatcher, this);
-                    return session;
-                },
-                (session) =>
-                {
-                    try
+                    () =>
                     {
-                        session.Detach();
-                    }
-                    catch (Exception ex)
+                        var session = new TcpSocketSaeaSession(_configuration, _configuration.BufferManager,
+                            _handleSaeaPool, _dispatcher, this);
+                        return session;
+                    },
+                    (session) =>
                     {
-                        Log.Error(ex.Message, ex);
-                    }
-                })
+                        try
+                        {
+                            session.Detach();
+                        }
+                        catch (Exception ex)
+                        {
+                            Log.Error(ex.Message, ex);
+                        }
+                    })
                 .Initialize(512);
         }
 
@@ -182,21 +190,20 @@ namespace Cowboy.Sockets
 
             try
             {
-                _listener = new Socket(this.ListenedEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
+                _listener = new Socket(ListenedEndPoint.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
                 SetSocketOptions();
 
-                _listener.Bind(this.ListenedEndPoint);
+                _listener.Bind(ListenedEndPoint);
 
                 _listener.Listen(_configuration.PendingConnectionBacklog);
 
-                Task.Factory.StartNew(async () =>
-                {
-                    await Accept();
-                },
-                TaskCreationOptions.LongRunning)
-                .Forget();
+                Task.Factory.StartNew(async () => { await Accept(); },
+                        TaskCreationOptions.LongRunning)
+                    .Forget();
             }
-            catch (Exception ex) when (!ShouldThrow(ex)) { }
+            catch (Exception ex) when (!ShouldThrow(ex))
+            {
+            }
         }
 
         public void Shutdown()
@@ -212,20 +219,24 @@ namespace Cowboy.Sockets
                 _listener = null;
 
                 Task.Factory.StartNew(async () =>
-                {
-                    try
-                    {
-                        foreach (var session in _sessions.Values)
                         {
-                            await session.Close(); // parent server close session when shutdown
-                        }
-                    }
-                    catch (Exception ex) when (!ShouldThrow(ex)) { }
-                },
-                TaskCreationOptions.PreferFairness)
-                .Wait();
+                            try
+                            {
+                                foreach (var session in _sessions.Values)
+                                {
+                                    await session.Close(); // parent server close session when shutdown
+                                }
+                            }
+                            catch (Exception ex) when (!ShouldThrow(ex))
+                            {
+                            }
+                        },
+                        TaskCreationOptions.PreferFairness)
+                    .Wait();
             }
-            catch (Exception ex) when (!ShouldThrow(ex)) { }
+            catch (Exception ex) when (!ShouldThrow(ex))
+            {
+            }
         }
 
         private void SetSocketOptions()
@@ -238,7 +249,9 @@ namespace Cowboy.Sockets
             {
                 _listener.SetIPProtectionLevel(IPProtectionLevel.EdgeRestricted);
             }
-            _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, _configuration.ReuseAddress);
+
+            _listener.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress,
+                _configuration.ReuseAddress);
         }
 
         private bool ShouldThrow(Exception ex)
@@ -250,6 +263,7 @@ namespace Cowboy.Sockets
             {
                 return false;
             }
+
             return true;
         }
 
@@ -265,12 +279,9 @@ namespace Cowboy.Sockets
                     if (socketError == SocketError.Success)
                     {
                         var acceptedSocket = saea.Saea.AcceptSocket;
-                        Task.Factory.StartNew(async () =>
-                        {
-                            await Process(acceptedSocket);
-                        },
-                        TaskCreationOptions.None)
-                        .Forget();
+                        Task.Factory.StartNew(async () => { await Process(acceptedSocket); },
+                                TaskCreationOptions.None)
+                            .Forget();
                     }
                     else
                     {
@@ -280,7 +291,9 @@ namespace Cowboy.Sockets
                     _acceptSaeaPool.Return(saea);
                 }
             }
-            catch (Exception ex) when (!ShouldThrow(ex)) { }
+            catch (Exception ex) when (!ShouldThrow(ex))
+            {
+            }
             catch (Exception ex)
             {
                 Log.Error(ex.Message, ex);
@@ -412,14 +425,10 @@ namespace Cowboy.Sockets
                     // free managed objects here
                     try
                     {
-                        if (_listener != null)
-                            _listener.Dispose();
-                        if (_acceptSaeaPool != null)
-                            _acceptSaeaPool.Dispose();
-                        if (_handleSaeaPool != null)
-                            _handleSaeaPool.Dispose();
-                        if (_sessionPool != null)
-                            _sessionPool.Dispose();
+                        _listener?.Dispose();
+                        _acceptSaeaPool?.Dispose();
+                        _handleSaeaPool?.Dispose();
+                        _sessionPool?.Dispose();
                     }
                     catch (Exception ex)
                     {

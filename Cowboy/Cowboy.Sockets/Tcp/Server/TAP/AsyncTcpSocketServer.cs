@@ -40,7 +40,7 @@ namespace Cowboy.Sockets
 
         public AsyncTcpSocketServer(IPEndPoint listenedEndPoint, IAsyncTcpSocketServerEventDispatcher dispatcher, AsyncTcpSocketServerConfiguration configuration = null)
         {
-            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
             _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new AsyncTcpSocketServerConfiguration();
 
@@ -108,7 +108,7 @@ namespace Cowboy.Sockets
 
             try
             {
-                _listener = new TcpListener(this.ListenedEndPoint);
+                _listener = new TcpListener(ListenedEndPoint);
                 SetSocketOptions();
 
                 _listener.Start(_configuration.PendingConnectionBacklog);

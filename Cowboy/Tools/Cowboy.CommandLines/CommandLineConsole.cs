@@ -14,10 +14,7 @@ namespace Cowboy.CommandLines
             Console.ResetColor();
 
             ICommandLine commandLine = sender as ICommandLine;
-            if (commandLine != null)
-            {
-                commandLine.Terminate();
-            }
+            commandLine?.Terminate();
 
             Environment.Exit(0);
         }

@@ -28,10 +28,10 @@ namespace Cowboy.Sockets
             if (continuation != null)
             {
                 var syncContext = _awaitable.ShouldCaptureContext
-                    ? this.SyncContext
+                    ? SyncContext
                     : null;
 
-                this.Complete();
+                Complete();
 
                 if (continuation != Sentinel)
                 {
@@ -61,7 +61,7 @@ namespace Cowboy.Sockets
             if (_continuation == Sentinel
                 || Interlocked.CompareExchange(ref _continuation, continuation, null) == Sentinel)
             {
-                this.Complete();
+                Complete();
 
                 if (!_awaitable.ShouldCaptureContext)
                     Task.Run(continuation);

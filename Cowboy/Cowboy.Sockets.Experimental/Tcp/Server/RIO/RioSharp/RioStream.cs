@@ -175,8 +175,7 @@ namespace RioSharp
         {
             Flush(false);
 
-            if (_currentInputSegment != null)
-                _currentInputSegment.Dispose();
+            _currentInputSegment?.Dispose();
 
             _currentOutputSegment.Dispose();
             _incommingSegments.Dispose();
