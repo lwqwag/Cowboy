@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.EAP.Awaitable
 {
     public sealed class SaeaAwaitable : IDisposable
     {

@@ -2,7 +2,7 @@
 using System.Net.Sockets;
 using System.Threading;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.EAP.Awaitable
 {
     public static class SaeaExtensions
     {

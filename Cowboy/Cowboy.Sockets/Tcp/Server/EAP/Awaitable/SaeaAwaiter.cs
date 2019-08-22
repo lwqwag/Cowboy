@@ -4,7 +4,7 @@ using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.EAP.Awaitable
 {
     public sealed class SaeaAwaiter : INotifyCompletion
     {

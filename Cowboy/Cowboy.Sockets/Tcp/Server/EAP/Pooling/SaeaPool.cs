@@ -1,4 +1,5 @@
 ﻿using System;
+using Cowboy.Sockets.Tcp.Server.EAP.Awaitable;
 
 namespace Cowboy.Sockets
 {

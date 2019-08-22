@@ -5,6 +5,7 @@ using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
 using Cowboy.Buffer;
+using Cowboy.Sockets.Tcp.Server.EAP.Awaitable;
 using Logrila.Logging;
 
 namespace Cowboy.Sockets
