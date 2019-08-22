@@ -16,9 +16,7 @@ namespace Cowboy.TcpLika
 
         public TcpLikaEngine(TcpLikaCommandLineOptions options, Action<string> logger = null)
         {
-            if (options == null)
-                throw new ArgumentNullException("options");
-            _options = options;
+            _options = options ?? throw new ArgumentNullException("options");
 
             if (logger != null)
                 _logger = logger;
@@ -48,9 +46,9 @@ namespace Cowboy.TcpLika
             {
                 var task = Task.Run(async () =>
                 {
-                    foreach (var remoteEP in _options.RemoteEndPoints)
+                    foreach (var remoteEp in _options.RemoteEndPoints)
                     {
-                        await PerformTcpSocketLoad(connectionsPerThread, remoteEP);
+                        await PerformTcpSocketLoad(connectionsPerThread, remoteEp);
                     }
                 });
                 tasks.Add(task);
@@ -59,9 +57,9 @@ namespace Cowboy.TcpLika
             {
                 var task = Task.Run(async () =>
                 {
-                    foreach (var remoteEP in _options.RemoteEndPoints)
+                    foreach (var remoteEp in _options.RemoteEndPoints)
                     {
-                        await PerformTcpSocketLoad(connectionsRemainder, remoteEP);
+                        await PerformTcpSocketLoad(connectionsRemainder, remoteEp);
                     }
                 });
                 tasks.Add(task);
@@ -70,7 +68,7 @@ namespace Cowboy.TcpLika
             Task.WaitAll(tasks.ToArray());
         }
 
-        private async Task PerformTcpSocketLoad(int connections, IPEndPoint remoteEP)
+        private async Task PerformTcpSocketLoad(int connections, IPEndPoint remoteEp)
         {
             var channels = new List<AsyncTcpSocketClient>();
             var configuration = new AsyncTcpSocketClientConfiguration();
@@ -81,7 +79,7 @@ namespace Cowboy.TcpLika
 
             for (int c = 0; c < connections; c++)
             {
-                var client = new AsyncTcpSocketClient(remoteEP,
+                var client = new AsyncTcpSocketClient(remoteEp,
                     onServerDataReceived: async (s, b, o, l) => { await Task.CompletedTask; },
                     onServerConnected: async (s) => { await Task.CompletedTask; },
                     onServerDisconnected: async (s) => { await Task.CompletedTask; },
@@ -89,10 +87,10 @@ namespace Cowboy.TcpLika
 
                 try
                 {
-                    _logger(string.Format("Connecting to [{0}].", remoteEP));
+                    _logger(string.Format("Connecting to [{0}].", remoteEp));
                     await client.Connect();
                     channels.Add(client);
-                    _logger(string.Format("Connected to [{0}] from [{1}].", remoteEP, client.LocalEndPoint));
+                    _logger(string.Format("Connected to [{0}] from [{1}].", remoteEp, client.LocalEndPoint));
                 }
                 catch (Exception ex) when (!ShouldThrow(ex))
                 {
@@ -101,11 +99,11 @@ namespace Cowboy.TcpLika
                         var a = ex as AggregateException;
                         if (a.InnerExceptions != null && a.InnerExceptions.Any())
                         {
-                            _logger(string.Format("Connect to [{0}] error occurred [{1}].", remoteEP, a.InnerExceptions.First().Message));
+                            _logger(string.Format("Connect to [{0}] error occurred [{1}].", remoteEp, a.InnerExceptions.First().Message));
                         }
                     }
                     else
-                        _logger(string.Format("Connect to [{0}] error occurred [{1}].", remoteEP, ex.Message));
+                        _logger(string.Format("Connect to [{0}] error occurred [{1}].", remoteEp, ex.Message));
 
                     if (client != null)
                     {
@@ -123,7 +121,7 @@ namespace Cowboy.TcpLika
             {
                 try
                 {
-                    _logger(string.Format("Closed to [{0}] from [{1}].", remoteEP, client.LocalEndPoint));
+                    _logger(string.Format("Closed to [{0}] from [{1}].", remoteEp, client.LocalEndPoint));
                     await client.Close();
                 }
                 catch (Exception ex) when (!ShouldThrow(ex))
@@ -133,11 +131,11 @@ namespace Cowboy.TcpLika
                         var a = ex as AggregateException;
                         if (a.InnerExceptions != null && a.InnerExceptions.Any())
                         {
-                            _logger(string.Format("Closed to [{0}] error occurred [{1}].", remoteEP, a.InnerExceptions.First().Message));
+                            _logger(string.Format("Closed to [{0}] error occurred [{1}].", remoteEp, a.InnerExceptions.First().Message));
                         }
                     }
                     else
-                        _logger(string.Format("Closed to [{0}] error occurred [{1}].", remoteEP, ex.Message));
+                        _logger(string.Format("Closed to [{0}] error occurred [{1}].", remoteEp, ex.Message));
                 }
             }
         }

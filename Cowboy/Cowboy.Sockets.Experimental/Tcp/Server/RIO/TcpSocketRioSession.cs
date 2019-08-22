@@ -14,7 +14,7 @@ namespace Cowboy.Sockets.Experimental
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<TcpSocketRioSession>();
+        private static readonly ILog Log = Logger.Get<TcpSocketRioSession>();
         private readonly object _opsLock = new object();
         private readonly TcpSocketRioServerConfiguration _configuration;
         private readonly ISegmentBufferManager _bufferManager;
@@ -27,10 +27,10 @@ namespace Cowboy.Sockets.Experimental
         private int _receiveBufferOffset = 0;
 
         private int _state;
-        private const int _none = 0;
-        private const int _connecting = 1;
-        private const int _connected = 2;
-        private const int _disposed = 5;
+        private const int NONE = 0;
+        private const int CONNECTING = 1;
+        private const int CONNECTED = 2;
+        private const int DISPOSED = 5;
 
         #endregion
 
@@ -43,22 +43,11 @@ namespace Cowboy.Sockets.Experimental
             ITcpSocketRioServerEventDispatcher dispatcher,
             TcpSocketRioServer server)
         {
-            if (configuration == null)
-                throw new ArgumentNullException("configuration");
-            if (bufferManager == null)
-                throw new ArgumentNullException("bufferManager");
-            if (socket == null)
-                throw new ArgumentNullException("socket");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
-            if (server == null)
-                throw new ArgumentNullException("server");
-
-            _configuration = configuration;
-            _bufferManager = bufferManager;
-            _socket = socket;
-            _dispatcher = dispatcher;
-            _server = server;
+            _configuration = configuration ?? throw new ArgumentNullException("configuration");
+            _bufferManager = bufferManager ?? throw new ArgumentNullException("bufferManager");
+            _socket = socket ?? throw new ArgumentNullException("socket");
+            _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
+            _server = server ?? throw new ArgumentNullException("server");
 
             _sessionKey = Guid.NewGuid().ToString();
             this.StartTime = DateTime.UtcNow;
@@ -74,12 +63,12 @@ namespace Cowboy.Sockets.Experimental
 
         #region Properties
 
-        public string SessionKey { get { return _sessionKey; } }
+        public string SessionKey => _sessionKey;
         public DateTime StartTime { get; private set; }
 
-        public RioSocket Socket { get { return _socket; } }
-        public Stream Stream { get { return _stream; } }
-        public TcpSocketRioServer Server { get { return _server; } }
+        public RioSocket Socket => _socket;
+        public Stream Stream => _stream;
+        public TcpSocketRioServer Server => _server;
 
         public TcpSocketConnectionState State
         {
@@ -87,13 +76,13 @@ namespace Cowboy.Sockets.Experimental
             {
                 switch (_state)
                 {
-                    case _none:
+                    case NONE:
                         return TcpSocketConnectionState.None;
-                    case _connecting:
+                    case CONNECTING:
                         return TcpSocketConnectionState.Connecting;
-                    case _connected:
+                    case CONNECTED:
                         return TcpSocketConnectionState.Connected;
-                    case _disposed:
+                    case DISPOSED:
                         return TcpSocketConnectionState.Closed;
                     default:
                         return TcpSocketConnectionState.Closed;
@@ -113,12 +102,12 @@ namespace Cowboy.Sockets.Experimental
 
         internal async Task Start()
         {
-            int origin = Interlocked.CompareExchange(ref _state, _connecting, _none);
-            if (origin == _disposed)
+            int origin = Interlocked.CompareExchange(ref _state, CONNECTING, NONE);
+            if (origin == DISPOSED)
             {
                 throw new ObjectDisposedException("This tcp socket session has been disposed when connecting.");
             }
-            else if (origin != _none)
+            else if (origin != NONE)
             {
                 throw new InvalidOperationException("This tcp socket session is in invalid state when connecting.");
             }
@@ -129,13 +118,13 @@ namespace Cowboy.Sockets.Experimental
                     _receiveBuffer = _bufferManager.BorrowBuffer();
                 _receiveBufferOffset = 0;
 
-                if (Interlocked.CompareExchange(ref _state, _connected, _connecting) != _connecting)
+                if (Interlocked.CompareExchange(ref _state, CONNECTED, CONNECTING) != CONNECTING)
                 {
                     await Close(); // connected with wrong state
                     throw new ObjectDisposedException("This tcp socket session has been disposed after connected.");
                 }
 
-                _log.DebugFormat("Session started on [{0}] in dispatcher [{1}] with session count [{2}].",
+                Log.DebugFormat("Session started on [{0}] in dispatcher [{1}] with session count [{2}].",
                     this.StartTime.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                     _dispatcher.GetType().Name,
                     this.Server.SessionCount);
@@ -161,7 +150,7 @@ namespace Cowboy.Sockets.Experimental
             }
             catch (Exception ex) // catch exceptions then log then re-throw
             {
-                _log.Error(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                Log.Error(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
                 await Close(); // handle tcp connection error occurred
                 throw;
             }
@@ -244,12 +233,12 @@ namespace Cowboy.Sockets.Experimental
 
         public async Task Close()
         {
-            if (Interlocked.Exchange(ref _state, _disposed) == _disposed)
+            if (Interlocked.Exchange(ref _state, DISPOSED) == DISPOSED)
             {
                 return;
             }
 
-            _log.DebugFormat("Session closed on [{0}] in dispatcher [{1}] with session count [{2}].",
+            Log.DebugFormat("Session closed on [{0}] in dispatcher [{1}] with session count [{2}].",
                 DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"),
                 _dispatcher.GetType().Name,
                 this.Server.SessionCount - 1);
@@ -345,7 +334,7 @@ namespace Cowboy.Sockets.Experimental
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
 
                 await Close(); // catch specified exception then intend to close the session
 
@@ -357,7 +346,7 @@ namespace Cowboy.Sockets.Experimental
 
         private async Task HandleUserSideError(Exception ex)
         {
-            _log.Error(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
+            Log.Error(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
             await Task.CompletedTask;
         }
 
@@ -415,7 +404,7 @@ namespace Cowboy.Sockets.Experimental
                 }
                 catch (Exception ex)
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
             }
         }

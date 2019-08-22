@@ -6,13 +6,8 @@ namespace Cowboy.Sockets
     {
         public FrameBuilder(IFrameEncoder encoder, IFrameDecoder decoder)
         {
-            if (encoder == null)
-                throw new ArgumentNullException("encoder");
-            if (decoder == null)
-                throw new ArgumentNullException("decoder");
-
-            this.Encoder = encoder;
-            this.Decoder = decoder;
+            this.Encoder = encoder ?? throw new ArgumentNullException("encoder");
+            this.Decoder = decoder ?? throw new ArgumentNullException("decoder");
         }
 
         public IFrameEncoder Encoder { get; private set; }

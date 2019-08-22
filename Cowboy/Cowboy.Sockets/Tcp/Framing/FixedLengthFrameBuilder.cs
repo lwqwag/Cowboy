@@ -26,7 +26,7 @@ namespace Cowboy.Sockets
             _fixedFrameLength = fixedFrameLength;
         }
 
-        public int FixedFrameLength { get { return _fixedFrameLength; } }
+        public int FixedFrameLength => _fixedFrameLength;
 
         public void EncodeFrame(byte[] payload, int offset, int count, out byte[] frameBuffer, out int frameBufferOffset, out int frameBufferLength)
         {
@@ -70,7 +70,7 @@ namespace Cowboy.Sockets
             _fixedFrameLength = fixedFrameLength;
         }
 
-        public int FixedFrameLength { get { return _fixedFrameLength; } }
+        public int FixedFrameLength => _fixedFrameLength;
 
         public bool TryDecodeFrame(byte[] buffer, int offset, int count, out int frameLength, out byte[] payload, out int payloadOffset, out int payloadCount)
         {

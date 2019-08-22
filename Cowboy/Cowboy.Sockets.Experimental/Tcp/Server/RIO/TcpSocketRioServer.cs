@@ -15,16 +15,16 @@ namespace Cowboy.Sockets.Experimental
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<TcpSocketRioServer>();
+        private static readonly ILog Log = Logger.Get<TcpSocketRioServer>();
         private static readonly byte[] EmptyArray = new byte[0];
         private readonly ConcurrentDictionary<string, TcpSocketRioSession> _sessions = new ConcurrentDictionary<string, TcpSocketRioSession>();
         private readonly TcpSocketRioServerConfiguration _configuration;
         private readonly ITcpSocketRioServerEventDispatcher _dispatcher;
 
         private int _state;
-        private const int _none = 0;
-        private const int _listening = 1;
-        private const int _disposed = 5;
+        private const int NONE = 0;
+        private const int LISTENING = 1;
+        private const int DISPOSED = 5;
 
         private RioFixedBufferPool _sendPool;
         private RioFixedBufferPool _receivePool;
@@ -46,13 +46,8 @@ namespace Cowboy.Sockets.Experimental
 
         public TcpSocketRioServer(IPEndPoint listenedEndPoint, ITcpSocketRioServerEventDispatcher dispatcher, TcpSocketRioServerConfiguration configuration = null)
         {
-            if (listenedEndPoint == null)
-                throw new ArgumentNullException("listenedEndPoint");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
-
-            this.ListenedEndPoint = listenedEndPoint;
-            _dispatcher = dispatcher;
+            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new TcpSocketRioServerConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -121,8 +116,8 @@ namespace Cowboy.Sockets.Experimental
         #region Properties
 
         public IPEndPoint ListenedEndPoint { get; private set; }
-        public bool IsListening { get { return _state == _listening; } }
-        public int SessionCount { get { return _sessions.Count; } }
+        public bool IsListening => _state == LISTENING;
+        public int SessionCount => _sessions.Count;
 
         #endregion
 
@@ -130,12 +125,12 @@ namespace Cowboy.Sockets.Experimental
 
         public void Listen()
         {
-            int origin = Interlocked.CompareExchange(ref _state, _listening, _none);
-            if (origin == _disposed)
+            int origin = Interlocked.CompareExchange(ref _state, LISTENING, NONE);
+            if (origin == DISPOSED)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
-            else if (origin != _none)
+            else if (origin != NONE)
             {
                 throw new InvalidOperationException("This tcp server has already started.");
             }
@@ -149,7 +144,7 @@ namespace Cowboy.Sockets.Experimental
 
         public void Shutdown()
         {
-            if (Interlocked.Exchange(ref _state, _disposed) == _disposed)
+            if (Interlocked.Exchange(ref _state, DISPOSED) == DISPOSED)
             {
                 return;
             }
@@ -199,7 +194,7 @@ namespace Cowboy.Sockets.Experimental
 
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _log.DebugFormat("New session [{0}].", session);
+                Log.DebugFormat("New session [{0}].", session);
                 try
                 {
                     await session.Start();
@@ -209,7 +204,7 @@ namespace Cowboy.Sockets.Experimental
                     TcpSocketRioSession recycle;
                     if (_sessions.TryRemove(session.SessionKey, out recycle))
                     {
-                        _log.DebugFormat("Close session [{0}].", recycle);
+                        Log.DebugFormat("Close session [{0}].", recycle);
                     }
                 }
             }
@@ -233,7 +228,7 @@ namespace Cowboy.Sockets.Experimental
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -251,7 +246,7 @@ namespace Cowboy.Sockets.Experimental
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
         }
 
@@ -315,7 +310,7 @@ namespace Cowboy.Sockets.Experimental
                 }
                 catch (Exception ex)
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
             }
         }

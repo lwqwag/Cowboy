@@ -3,15 +3,16 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using Cowboy.Sockets.Tcp.Server.APM.EventArgs;
 using Logrila.Logging;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.APM
 {
     public class TcpSocketServer
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<TcpSocketServer>();
+        private static readonly ILog Log = Logger.Get<TcpSocketServer>();
         private TcpListener _listener;
         private readonly ConcurrentDictionary<string, TcpSocketSession> _sessions = new ConcurrentDictionary<string, TcpSocketSession>();
         private readonly TcpSocketServerConfiguration _configuration;
@@ -34,10 +35,7 @@ namespace Cowboy.Sockets
 
         public TcpSocketServer(IPEndPoint listenedEndPoint, TcpSocketServerConfiguration configuration = null)
         {
-            if (listenedEndPoint == null)
-                throw new ArgumentNullException("listenedEndPoint");
-
-            this.ListenedEndPoint = listenedEndPoint;
+            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
             _configuration = configuration ?? new TcpSocketServerConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -51,8 +49,8 @@ namespace Cowboy.Sockets
         #region Properties
 
         public IPEndPoint ListenedEndPoint { get; private set; }
-        public bool IsListening { get { return _isListening; } }
-        public int SessionCount { get { return _sessions.Count; } }
+        public bool IsListening => _isListening;
+        public int SessionCount => _sessions.Count;
 
         #endregion
 
@@ -98,7 +96,7 @@ namespace Cowboy.Sockets
                 {
                     if (!ShouldThrow(ex))
                     {
-                        _log.Error(ex.Message, ex);
+                        Log.Error(ex.Message, ex);
                     }
                     else throw;
                 }
@@ -133,7 +131,7 @@ namespace Cowboy.Sockets
             {
                 if (!ShouldThrow(ex))
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
                 else throw;
             }
@@ -141,8 +139,11 @@ namespace Cowboy.Sockets
 
         private void HandleTcpClientAccepted(IAsyncResult ar)
         {
-            if (!_isListening)
-                return;
+            lock (_opsLock)
+            {
+                if (!_isListening)
+                    return;
+            }
 
             try
             {
@@ -162,7 +163,7 @@ namespace Cowboy.Sockets
                 }
                 catch (Exception ex)
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
 
                 if (isSessionStarted)
@@ -178,7 +179,7 @@ namespace Cowboy.Sockets
             {
                 if (!ShouldThrow(ex))
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
                 else throw;
             }
@@ -186,13 +187,9 @@ namespace Cowboy.Sockets
 
         private void CloseSession(TcpSocketSession session)
         {
-            TcpSocketSession sessionToBeThrowAway;
-            _sessions.TryRemove(session.SessionKey, out sessionToBeThrowAway);
+            _sessions.TryRemove(session.SessionKey, out _);
 
-            if (session != null)
-            {
-                session.Close(); // parent server close session
-            }
+            session.Close(); // parent server close session
         }
 
         private bool ShouldThrow(Exception ex)
@@ -247,7 +244,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -281,7 +278,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
         }
 
@@ -315,7 +312,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -349,7 +346,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
         }
 
@@ -378,7 +375,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
 
             return null;
@@ -414,7 +411,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
 
             return null;
@@ -505,15 +502,13 @@ namespace Cowboy.Sockets
 
         public TcpSocketSession GetSession(string sessionKey)
         {
-            TcpSocketSession session = null;
-            _sessions.TryGetValue(sessionKey, out session);
+            _sessions.TryGetValue(sessionKey, out var session);
             return session;
         }
 
         public void CloseSession(string sessionKey)
         {
-            TcpSocketSession session = null;
-            if (_sessions.TryGetValue(sessionKey, out session))
+            if (_sessions.TryGetValue(sessionKey, out var session))
             {
                 session.Close(); // parent server close session by session-key
             }
@@ -531,10 +526,7 @@ namespace Cowboy.Sockets
         {
             try
             {
-                if (ClientConnected != null)
-                {
-                    ClientConnected(this, new TcpClientConnectedEventArgs(session));
-                }
+                ClientConnected?.Invoke(this, new TcpClientConnectedEventArgs(session));
             }
             catch (Exception ex)
             {
@@ -546,10 +538,7 @@ namespace Cowboy.Sockets
         {
             try
             {
-                if (ClientDisconnected != null)
-                {
-                    ClientDisconnected(this, new TcpClientDisconnectedEventArgs(session));
-                }
+                ClientDisconnected?.Invoke(this, new TcpClientDisconnectedEventArgs(session));
             }
             catch (Exception ex)
             {
@@ -557,8 +546,7 @@ namespace Cowboy.Sockets
             }
             finally
             {
-                TcpSocketSession sessionToBeThrowAway;
-                _sessions.TryRemove(session.SessionKey, out sessionToBeThrowAway);
+                _sessions.TryRemove(session.SessionKey, out _);
             }
         }
 
@@ -566,10 +554,7 @@ namespace Cowboy.Sockets
         {
             try
             {
-                if (ClientDataReceived != null)
-                {
-                    ClientDataReceived(this, new TcpClientDataReceivedEventArgs(session, data, dataOffset, dataLength));
-                }
+                ClientDataReceived?.Invoke(this, new TcpClientDataReceivedEventArgs(session, data, dataOffset, dataLength));
             }
             catch (Exception ex)
             {
@@ -579,7 +564,7 @@ namespace Cowboy.Sockets
 
         private void HandleUserSideError(TcpSocketSession session, Exception ex)
         {
-            _log.Error(string.Format("Session [{0}] error occurred in user side [{1}].", session, ex.Message), ex);
+            Log.Error($"Session [{session}] error occurred in user side [{ex.Message}].", ex);
         }
 
         #endregion

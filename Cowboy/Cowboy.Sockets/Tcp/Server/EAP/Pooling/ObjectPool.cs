@@ -16,13 +16,7 @@ namespace Cowboy.Sockets
 
         protected abstract T Create();
 
-        public int Count
-        {
-            get
-            {
-                return _bag.Count;
-            }
-        }
+        public int Count => _bag.Count;
 
         public void Add(T item)
         {

@@ -16,15 +16,9 @@ namespace Cowboy.Sockets
             _awaiter = new SaeaAwaiter(this);
         }
 
-        public SocketAsyncEventArgs Saea
-        {
-            get { return _saea; }
-        }
+        public SocketAsyncEventArgs Saea => _saea;
 
-        public object SyncRoot
-        {
-            get { return _sync; }
-        }
+        public object SyncRoot => _sync;
 
         public SaeaAwaiter GetAwaiter()
         {
@@ -33,10 +27,7 @@ namespace Cowboy.Sockets
 
         public bool ShouldCaptureContext
         {
-            get
-            {
-                return _shouldCaptureContext;
-            }
+            get => _shouldCaptureContext;
             set
             {
                 lock (_awaiter.SyncRoot)
@@ -50,10 +41,7 @@ namespace Cowboy.Sockets
             }
         }
 
-        public bool IsDisposed
-        {
-            get { return _isDisposed; }
-        }
+        public bool IsDisposed => _isDisposed;
 
         public void Dispose()
         {

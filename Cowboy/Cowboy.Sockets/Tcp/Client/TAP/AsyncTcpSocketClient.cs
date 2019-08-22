@@ -15,7 +15,7 @@ namespace Cowboy.Sockets
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<AsyncTcpSocketClient>();
+        private static readonly ILog Log = Logger.Get<AsyncTcpSocketClient>();
         private TcpClient _tcpClient;
         private readonly IAsyncTcpSocketClientEventDispatcher _dispatcher;
         private readonly AsyncTcpSocketClientConfiguration _configuration;
@@ -26,10 +26,10 @@ namespace Cowboy.Sockets
         private int _receiveBufferOffset = 0;
 
         private int _state;
-        private const int _none = 0;
-        private const int _connecting = 1;
-        private const int _connected = 2;
-        private const int _closed = 5;
+        private const int NONE = 0;
+        private const int CONNECTING = 1;
+        private const int CONNECTED = 2;
+        private const int CLOSED = 5;
 
         #endregion
 
@@ -40,8 +40,8 @@ namespace Cowboy.Sockets
         {
         }
 
-        public AsyncTcpSocketClient(IPAddress remoteAddress, int remotePort, IPEndPoint localEP, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
-            : this(new IPEndPoint(remoteAddress, remotePort), localEP, dispatcher, configuration)
+        public AsyncTcpSocketClient(IPAddress remoteAddress, int remotePort, IPEndPoint localEp, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
+            : this(new IPEndPoint(remoteAddress, remotePort), localEp, dispatcher, configuration)
         {
         }
 
@@ -50,21 +50,16 @@ namespace Cowboy.Sockets
         {
         }
 
-        public AsyncTcpSocketClient(IPEndPoint remoteEP, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
-            : this(remoteEP, null, dispatcher, configuration)
+        public AsyncTcpSocketClient(IPEndPoint remoteEp, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
+            : this(remoteEp, null, dispatcher, configuration)
         {
         }
 
-        public AsyncTcpSocketClient(IPEndPoint remoteEP, IPEndPoint localEP, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
+        public AsyncTcpSocketClient(IPEndPoint remoteEp, IPEndPoint localEp, IAsyncTcpSocketClientEventDispatcher dispatcher, AsyncTcpSocketClientConfiguration configuration = null)
         {
-            if (remoteEP == null)
-                throw new ArgumentNullException("remoteEP");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
-
-            _remoteEndPoint = remoteEP;
-            _localEndPoint = localEP;
-            _dispatcher = dispatcher;
+            _remoteEndPoint = remoteEp ?? throw new ArgumentNullException("remoteEp");
+            _localEndPoint = localEp;
+            _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new AsyncTcpSocketClientConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -83,12 +78,12 @@ namespace Cowboy.Sockets
         {
         }
 
-        public AsyncTcpSocketClient(IPAddress remoteAddress, int remotePort, IPEndPoint localEP,
+        public AsyncTcpSocketClient(IPAddress remoteAddress, int remotePort, IPEndPoint localEp,
             Func<AsyncTcpSocketClient, byte[], int, int, Task> onServerDataReceived = null,
             Func<AsyncTcpSocketClient, Task> onServerConnected = null,
             Func<AsyncTcpSocketClient, Task> onServerDisconnected = null,
             AsyncTcpSocketClientConfiguration configuration = null)
-            : this(new IPEndPoint(remoteAddress, remotePort), localEP,
+            : this(new IPEndPoint(remoteAddress, remotePort), localEp,
                   onServerDataReceived, onServerConnected, onServerDisconnected, configuration)
         {
         }
@@ -103,22 +98,22 @@ namespace Cowboy.Sockets
         {
         }
 
-        public AsyncTcpSocketClient(IPEndPoint remoteEP,
+        public AsyncTcpSocketClient(IPEndPoint remoteEp,
             Func<AsyncTcpSocketClient, byte[], int, int, Task> onServerDataReceived = null,
             Func<AsyncTcpSocketClient, Task> onServerConnected = null,
             Func<AsyncTcpSocketClient, Task> onServerDisconnected = null,
             AsyncTcpSocketClientConfiguration configuration = null)
-            : this(remoteEP, null,
+            : this(remoteEp, null,
                   onServerDataReceived, onServerConnected, onServerDisconnected, configuration)
         {
         }
 
-        public AsyncTcpSocketClient(IPEndPoint remoteEP, IPEndPoint localEP,
+        public AsyncTcpSocketClient(IPEndPoint remoteEp, IPEndPoint localEp,
             Func<AsyncTcpSocketClient, byte[], int, int, Task> onServerDataReceived = null,
             Func<AsyncTcpSocketClient, Task> onServerConnected = null,
             Func<AsyncTcpSocketClient, Task> onServerDisconnected = null,
             AsyncTcpSocketClientConfiguration configuration = null)
-            : this(remoteEP, localEP,
+            : this(remoteEp, localEp,
                  new DefaultAsyncTcpSocketClientEventDispatcher(onServerDataReceived, onServerConnected, onServerDisconnected),
                  configuration)
         {
@@ -128,11 +123,11 @@ namespace Cowboy.Sockets
 
         #region Properties
 
-        public TimeSpan ConnectTimeout { get { return _configuration.ConnectTimeout; } }
+        public TimeSpan ConnectTimeout => _configuration.ConnectTimeout;
 
-        private bool Connected { get { return _tcpClient != null && _tcpClient.Client.Connected; } }
-        public IPEndPoint RemoteEndPoint { get { return Connected ? (IPEndPoint)_tcpClient.Client.RemoteEndPoint : _remoteEndPoint; } }
-        public IPEndPoint LocalEndPoint { get { return Connected ? (IPEndPoint)_tcpClient.Client.LocalEndPoint : _localEndPoint; } }
+        private bool Connected => _tcpClient != null && _tcpClient.Client.Connected;
+        public IPEndPoint RemoteEndPoint => Connected ? (IPEndPoint)_tcpClient.Client.RemoteEndPoint : _remoteEndPoint;
+        public IPEndPoint LocalEndPoint => Connected ? (IPEndPoint)_tcpClient.Client.LocalEndPoint : _localEndPoint;
 
         public TcpSocketConnectionState State
         {
@@ -140,13 +135,13 @@ namespace Cowboy.Sockets
             {
                 switch (_state)
                 {
-                    case _none:
+                    case NONE:
                         return TcpSocketConnectionState.None;
-                    case _connecting:
+                    case CONNECTING:
                         return TcpSocketConnectionState.Connecting;
-                    case _connected:
+                    case CONNECTED:
                         return TcpSocketConnectionState.Connected;
-                    case _closed:
+                    case CLOSED:
                         return TcpSocketConnectionState.Closed;
                     default:
                         return TcpSocketConnectionState.Closed;
@@ -166,8 +161,8 @@ namespace Cowboy.Sockets
 
         public async Task Connect()
         {
-            int origin = Interlocked.Exchange(ref _state, _connecting);
-            if (!(origin == _none || origin == _closed))
+            int origin = Interlocked.Exchange(ref _state, CONNECTING);
+            if (!(origin == NONE || origin == CLOSED))
             {
                 await Close(false); // connecting with wrong state
                 throw new InvalidOperationException("This tcp socket client is in invalid state when connecting.");
@@ -203,13 +198,13 @@ namespace Cowboy.Sockets
                     _receiveBuffer = _configuration.BufferManager.BorrowBuffer();
                 _receiveBufferOffset = 0;
 
-                if (Interlocked.CompareExchange(ref _state, _connected, _connecting) != _connecting)
+                if (Interlocked.CompareExchange(ref _state, CONNECTED, CONNECTING) != CONNECTING)
                 {
                     await Close(false); // connected with wrong state
                     throw new InvalidOperationException("This tcp socket client is in invalid state when connected.");
                 }
 
-                _log.DebugFormat("Connected to server [{0}] with dispatcher [{1}] on [{2}].",
+                Log.DebugFormat("Connected to server [{0}] with dispatcher [{1}] on [{2}].",
                     this.RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
@@ -240,7 +235,7 @@ namespace Cowboy.Sockets
             }
             catch (Exception ex) // catch exceptions then log then re-throw
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
                 await Close(true); // handle tcp connection error occurred
                 throw;
             }
@@ -359,7 +354,7 @@ namespace Cowboy.Sockets
                     if (_configuration.SslPolicyErrorsBypassed)
                         return true;
                     else
-                        _log.ErrorFormat("Error occurred when validating remote certificate: [{0}], [{1}].",
+                        Log.ErrorFormat("Error occurred when validating remote certificate: [{0}], [{1}].",
                             this.RemoteEndPoint, sslPolicyErrors);
 
                     return false;
@@ -389,7 +384,7 @@ namespace Cowboy.Sockets
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
             // to determine what security services are used by the SslStream. 
             // Check the IsMutuallyAuthenticated property to determine whether mutual authentication occurred.
-            _log.DebugFormat(
+            Log.DebugFormat(
                 "Ssl Stream: SslProtocol[{0}], IsServer[{1}], IsAuthenticated[{2}], IsEncrypted[{3}], IsSigned[{4}], IsMutuallyAuthenticated[{5}], "
                 + "HashAlgorithm[{6}], HashStrength[{7}], KeyExchangeAlgorithm[{8}], KeyExchangeStrength[{9}], CipherAlgorithm[{10}], CipherStrength[{11}].",
                 sslStream.SslProtocol,
@@ -419,7 +414,7 @@ namespace Cowboy.Sockets
 
         private async Task Close(bool shallNotifyUserSide)
         {
-            if (Interlocked.Exchange(ref _state, _closed) == _closed)
+            if (Interlocked.Exchange(ref _state, CLOSED) == CLOSED)
             {
                 return;
             }
@@ -428,7 +423,7 @@ namespace Cowboy.Sockets
 
             if (shallNotifyUserSide)
             {
-                _log.DebugFormat("Disconnected from server [{0}] with dispatcher [{1}] on [{2}].",
+                Log.DebugFormat("Disconnected from server [{0}] with dispatcher [{1}] on [{2}].",
                     this.RemoteEndPoint,
                     _dispatcher.GetType().Name,
                     DateTime.UtcNow.ToString(@"yyyy-MM-dd HH:mm:ss.fffffff"));
@@ -537,7 +532,7 @@ namespace Cowboy.Sockets
                 || ex is ArgumentException      // buffer array operation
                 )
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
 
                 await Close(false); // intend to close the session
 
@@ -549,7 +544,7 @@ namespace Cowboy.Sockets
 
         private async Task HandleUserSideError(Exception ex)
         {
-            _log.Error(string.Format("Client [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
+            Log.Error(string.Format("Client [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
             await Task.CompletedTask;
         }
 

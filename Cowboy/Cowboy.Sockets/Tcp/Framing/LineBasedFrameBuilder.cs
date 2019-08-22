@@ -5,10 +5,10 @@ namespace Cowboy.Sockets
 {
     public class LineDelimiter : IEquatable<LineDelimiter>
     {
-        public static readonly LineDelimiter CRLF = new LineDelimiter("\r\n");
-        public static readonly LineDelimiter UNIX = new LineDelimiter("\n");
-        public static readonly LineDelimiter MAC = new LineDelimiter("\r");
-        public static readonly LineDelimiter WINDOWS = CRLF;
+        public static readonly LineDelimiter Crlf = new LineDelimiter("\r\n");
+        public static readonly LineDelimiter Unix = new LineDelimiter("\n");
+        public static readonly LineDelimiter Mac = new LineDelimiter("\r");
+        public static readonly LineDelimiter Windows = Crlf;
 
         public LineDelimiter(string delimiter)
         {
@@ -68,18 +68,16 @@ namespace Cowboy.Sockets
         private readonly LineDelimiter _delimiter;
 
         public LineBasedFrameEncoder()
-            : this(LineDelimiter.CRLF)
+            : this(LineDelimiter.Crlf)
         {
         }
 
         public LineBasedFrameEncoder(LineDelimiter delimiter)
         {
-            if (delimiter == null)
-                throw new ArgumentNullException("delimiter");
-            _delimiter = delimiter;
+            _delimiter = delimiter ?? throw new ArgumentNullException("delimiter");
         }
 
-        public LineDelimiter LineDelimiter { get { return _delimiter; } }
+        public LineDelimiter LineDelimiter => _delimiter;
 
         public void EncodeFrame(byte[] payload, int offset, int count, out byte[] frameBuffer, out int frameBufferOffset, out int frameBufferLength)
         {
@@ -98,18 +96,16 @@ namespace Cowboy.Sockets
         private readonly LineDelimiter _delimiter;
 
         public LineBasedFrameDecoder()
-            : this(LineDelimiter.CRLF)
+            : this(LineDelimiter.Crlf)
         {
         }
 
         public LineBasedFrameDecoder(LineDelimiter delimiter)
         {
-            if (delimiter == null)
-                throw new ArgumentNullException("delimiter");
-            _delimiter = delimiter;
+            _delimiter = delimiter ?? throw new ArgumentNullException("delimiter");
         }
 
-        public LineDelimiter LineDelimiter { get { return _delimiter; } }
+        public LineDelimiter LineDelimiter => _delimiter;
 
         public bool TryDecodeFrame(byte[] buffer, int offset, int count, out int frameLength, out byte[] payload, out int payloadOffset, out int payloadCount)
         {

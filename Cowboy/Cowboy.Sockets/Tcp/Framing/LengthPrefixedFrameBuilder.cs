@@ -1,4 +1,4 @@
-﻿fusing System;
+﻿using System;
 
 namespace Cowboy.Sockets
 {
@@ -36,7 +36,7 @@ namespace Cowboy.Sockets
 
     public sealed class LengthPrefixedFrameEncoder : IFrameEncoder
     {
-        private static readonly Random _rng = new Random(DateTime.UtcNow.Millisecond);
+        private static readonly Random Rng = new Random(DateTime.UtcNow.Millisecond);
         private static readonly int MaskingKeyLength = 4;
 
         public LengthPrefixedFrameEncoder(bool isMasked = false)
@@ -104,7 +104,7 @@ namespace Cowboy.Sockets
                 int maskingKeyIndex = fragment.Length - (MaskingKeyLength + count);
                 for (var i = maskingKeyIndex; i < maskingKeyIndex + MaskingKeyLength; i++)
                 {
-                    fragment[i] = (byte)_rng.Next(0, 255);
+                    fragment[i] = (byte)Rng.Next(0, 255);
                 }
                 if (count > 0)
                 {

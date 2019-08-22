@@ -13,16 +13,16 @@ namespace Cowboy.Sockets
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<TcpSocketSaeaServer>();
+        private static readonly ILog Log = Logger.Get<TcpSocketSaeaServer>();
         private static readonly byte[] EmptyArray = new byte[0];
         private readonly ConcurrentDictionary<string, TcpSocketSaeaSession> _sessions = new ConcurrentDictionary<string, TcpSocketSaeaSession>();
         private readonly TcpSocketSaeaServerConfiguration _configuration;
         private readonly ITcpSocketSaeaServerEventDispatcher _dispatcher;
 
         private int _state;
-        private const int _none = 0;
-        private const int _listening = 1;
-        private const int _disposed = 5;
+        private const int NONE = 0;
+        private const int LISTENING = 1;
+        private const int DISPOSED = 5;
 
         private Socket _listener;
         private SaeaPool _acceptSaeaPool;
@@ -48,13 +48,8 @@ namespace Cowboy.Sockets
 
         public TcpSocketSaeaServer(IPEndPoint listenedEndPoint, ITcpSocketSaeaServerEventDispatcher dispatcher, TcpSocketSaeaServerConfiguration configuration = null)
         {
-            if (listenedEndPoint == null)
-                throw new ArgumentNullException("listenedEndPoint");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
-
-            this.ListenedEndPoint = listenedEndPoint;
-            _dispatcher = dispatcher;
+            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new TcpSocketSaeaServerConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -116,7 +111,7 @@ namespace Cowboy.Sockets
                     }
                     catch (Exception ex)
                     {
-                        _log.Error(ex.Message, ex);
+                        Log.Error(ex.Message, ex);
                     }
                 })
                 .Initialize(16);
@@ -137,7 +132,7 @@ namespace Cowboy.Sockets
                     }
                     catch (Exception ex)
                     {
-                        _log.Error(ex.Message, ex);
+                        Log.Error(ex.Message, ex);
                     }
                 })
                 .Initialize(1024);
@@ -155,7 +150,7 @@ namespace Cowboy.Sockets
                     }
                     catch (Exception ex)
                     {
-                        _log.Error(ex.Message, ex);
+                        Log.Error(ex.Message, ex);
                     }
                 })
                 .Initialize(512);
@@ -166,8 +161,8 @@ namespace Cowboy.Sockets
         #region Properties
 
         public IPEndPoint ListenedEndPoint { get; private set; }
-        public bool IsListening { get { return _state == _listening; } }
-        public int SessionCount { get { return _sessions.Count; } }
+        public bool IsListening => _state == LISTENING;
+        public int SessionCount => _sessions.Count;
 
         #endregion
 
@@ -175,12 +170,12 @@ namespace Cowboy.Sockets
 
         public void Listen()
         {
-            int origin = Interlocked.CompareExchange(ref _state, _listening, _none);
-            if (origin == _disposed)
+            int origin = Interlocked.CompareExchange(ref _state, LISTENING, NONE);
+            if (origin == DISPOSED)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
-            else if (origin != _none)
+            else if (origin != NONE)
             {
                 throw new InvalidOperationException("This tcp server has already started.");
             }
@@ -206,7 +201,7 @@ namespace Cowboy.Sockets
 
         public void Shutdown()
         {
-            if (Interlocked.Exchange(ref _state, _disposed) == _disposed)
+            if (Interlocked.Exchange(ref _state, DISPOSED) == DISPOSED)
             {
                 return;
             }
@@ -279,7 +274,7 @@ namespace Cowboy.Sockets
                     }
                     else
                     {
-                        _log.ErrorFormat("Error occurred when accept incoming socket [{0}].", socketError);
+                        Log.ErrorFormat("Error occurred when accept incoming socket [{0}].", socketError);
                     }
 
                     _acceptSaeaPool.Return(saea);
@@ -288,7 +283,7 @@ namespace Cowboy.Sockets
             catch (Exception ex) when (!ShouldThrow(ex)) { }
             catch (Exception ex)
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
             }
         }
 
@@ -299,7 +294,7 @@ namespace Cowboy.Sockets
 
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _log.DebugFormat("New session [{0}].", session);
+                Log.DebugFormat("New session [{0}].", session);
                 try
                 {
                     await session.Start();
@@ -309,7 +304,7 @@ namespace Cowboy.Sockets
                     TcpSocketSaeaSession recycle;
                     if (_sessions.TryRemove(session.SessionKey, out recycle))
                     {
-                        _log.DebugFormat("Close session [{0}].", recycle);
+                        Log.DebugFormat("Close session [{0}].", recycle);
                     }
                 }
             }
@@ -335,7 +330,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -353,7 +348,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
         }
 
@@ -428,7 +423,7 @@ namespace Cowboy.Sockets
                     }
                     catch (Exception ex)
                     {
-                        _log.Error(ex.Message, ex);
+                        Log.Error(ex.Message, ex);
                     }
                 }
 

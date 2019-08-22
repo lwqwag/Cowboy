@@ -1,4 +1,6 @@
-﻿namespace RioSharp
+﻿using Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp;
+
+namespace RioSharp
 {
     public class RioConnectionlessSocketPool : RioSocketPool
     {

@@ -8,13 +8,13 @@ using System.Threading;
 using Cowboy.Buffer;
 using Logrila.Logging;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.APM
 {
     public sealed class TcpSocketSession
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<TcpSocketSession>();
+        private static readonly ILog Log = Logger.Get<TcpSocketSession>();
         private TcpClient _tcpClient;
         private readonly TcpSocketServerConfiguration _configuration;
         private readonly ISegmentBufferManager _bufferManager;
@@ -27,10 +27,10 @@ namespace Cowboy.Sockets
         private IPEndPoint _localEndPoint;
 
         private int _state;
-        private const int _none = 0;
-        private const int _connecting = 1;
-        private const int _connected = 2;
-        private const int _disposed = 5;
+        private const int NONE = 0;
+        private const int CONNECTING = 1;
+        private const int CONNECTED = 2;
+        private const int DISPOSED = 5;
 
         #endregion
 
@@ -42,19 +42,10 @@ namespace Cowboy.Sockets
             ISegmentBufferManager bufferManager,
             TcpSocketServer server)
         {
-            if (tcpClient == null)
-                throw new ArgumentNullException("tcpClient");
-            if (configuration == null)
-                throw new ArgumentNullException("configuration");
-            if (bufferManager == null)
-                throw new ArgumentNullException("bufferManager");
-            if (server == null)
-                throw new ArgumentNullException("server");
-
-            _tcpClient = tcpClient;
-            _configuration = configuration;
-            _bufferManager = bufferManager;
-            _server = server;
+            _tcpClient = tcpClient ?? throw new ArgumentNullException("tcpClient");
+            _configuration = configuration ?? throw new ArgumentNullException("configuration");
+            _bufferManager = bufferManager ?? throw new ArgumentNullException("bufferManager");
+            _server = server ?? throw new ArgumentNullException("server");
 
             _sessionKey = Guid.NewGuid().ToString();
             this.StartTime = DateTime.UtcNow;
@@ -69,17 +60,17 @@ namespace Cowboy.Sockets
 
         #region Properties
 
-        public string SessionKey { get { return _sessionKey; } }
+        public string SessionKey => _sessionKey;
         public DateTime StartTime { get; private set; }
-        public TimeSpan ConnectTimeout { get { return _configuration.ConnectTimeout; } }
+        public TimeSpan ConnectTimeout => _configuration.ConnectTimeout;
 
-        private bool Connected { get { return _tcpClient != null && _tcpClient.Connected; } }
-        public IPEndPoint RemoteEndPoint { get { return Connected ? (IPEndPoint)_tcpClient.Client.RemoteEndPoint : _remoteEndPoint; } }
-        public IPEndPoint LocalEndPoint { get { return Connected ? (IPEndPoint)_tcpClient.Client.LocalEndPoint : _localEndPoint; } }
+        private bool Connected => _tcpClient != null && _tcpClient.Connected;
+        public IPEndPoint RemoteEndPoint => Connected ? (IPEndPoint)_tcpClient.Client.RemoteEndPoint : _remoteEndPoint;
+        public IPEndPoint LocalEndPoint => Connected ? (IPEndPoint)_tcpClient.Client.LocalEndPoint : _localEndPoint;
 
-        public Socket Socket { get { return Connected ? _tcpClient.Client : null; } }
-        public Stream Stream { get { return _stream; } }
-        public TcpSocketServer Server { get { return _server; } }
+        public Socket Socket => Connected ? _tcpClient.Client : null;
+        public Stream Stream => _stream;
+        public TcpSocketServer Server => _server;
 
         public TcpSocketConnectionState State
         {
@@ -87,13 +78,13 @@ namespace Cowboy.Sockets
             {
                 switch (_state)
                 {
-                    case _none:
+                    case NONE:
                         return TcpSocketConnectionState.None;
-                    case _connecting:
+                    case CONNECTING:
                         return TcpSocketConnectionState.Connecting;
-                    case _connected:
+                    case CONNECTED:
                         return TcpSocketConnectionState.Connected;
-                    case _disposed:
+                    case DISPOSED:
                         return TcpSocketConnectionState.Closed;
                     default:
                         return TcpSocketConnectionState.Closed;
@@ -113,12 +104,12 @@ namespace Cowboy.Sockets
 
         internal void Start()
         {
-            int origin = Interlocked.CompareExchange(ref _state, _connecting, _none);
-            if (origin == _disposed)
+            int origin = Interlocked.CompareExchange(ref _state, CONNECTING, NONE);
+            if (origin == DISPOSED)
             {
                 throw new ObjectDisposedException("This tcp socket session has been disposed when connecting.");
             }
-            else if (origin != _none)
+            else if (origin != NONE)
             {
                 throw new InvalidOperationException("This tcp socket session is in invalid state when connecting.");
             }
@@ -131,7 +122,7 @@ namespace Cowboy.Sockets
                     _receiveBuffer = _bufferManager.BorrowBuffer();
                 _receiveBufferOffset = 0;
 
-                if (Interlocked.CompareExchange(ref _state, _connected, _connecting) != _connecting)
+                if (Interlocked.CompareExchange(ref _state, CONNECTED, CONNECTING) != CONNECTING)
                 {
                     Close(false); // connecting with wrong state
                     throw new ObjectDisposedException("This tcp socket session has been disposed after connected.");
@@ -159,7 +150,7 @@ namespace Cowboy.Sockets
             }
             catch (Exception ex) // catch exceptions then log then re-throw
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
                 Close(true); // handle tcp connection error occurred
                 throw;
             }
@@ -172,7 +163,7 @@ namespace Cowboy.Sockets
 
         private void Close(bool shallNotifyUserSide)
         {
-            if (Interlocked.Exchange(ref _state, _disposed) == _disposed)
+            if (Interlocked.Exchange(ref _state, DISPOSED) == DISPOSED)
             {
                 return;
             }
@@ -278,7 +269,7 @@ namespace Cowboy.Sockets
                     if (_configuration.SslPolicyErrorsBypassed)
                         return true;
                     else
-                        _log.ErrorFormat("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
+                        Log.ErrorFormat("Session [{0}] error occurred when validating remote certificate: [{1}], [{2}].",
                             this, this.RemoteEndPoint, sslPolicyErrors);
 
                     return false;
@@ -317,7 +308,7 @@ namespace Cowboy.Sockets
             // When authentication succeeds, you must check the IsEncrypted and IsSigned properties 
             // to determine what security services are used by the SslStream. 
             // Check the IsMutuallyAuthenticated property to determine whether mutual authentication occurred.
-            _log.DebugFormat(
+            Log.DebugFormat(
                 "Ssl Stream: SslProtocol[{0}], IsServer[{1}], IsAuthenticated[{2}], IsEncrypted[{3}], IsSigned[{4}], IsMutuallyAuthenticated[{5}], "
                 + "HashAlgorithm[{6}], HashStrength[{7}], KeyExchangeAlgorithm[{8}], KeyExchangeStrength[{9}], CipherAlgorithm[{10}], CipherStrength[{11}].",
                 sslStream.SslProtocol,
@@ -400,7 +391,7 @@ namespace Cowboy.Sockets
                 }
                 catch (Exception innnerException)
                 {
-                    _log.Error(innnerException.Message, innnerException);
+                    Log.Error(innnerException.Message, innnerException);
                 }
             }
         }
@@ -515,7 +506,7 @@ namespace Cowboy.Sockets
                 )
             {
                 if (ex is SocketException)
-                    _log.Error(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
+                    Log.Error(string.Format("Session [{0}] exception occurred, [{1}].", this, ex.Message), ex);
 
                 Close(true); // catch specified exception then intend to close the session
 
@@ -527,7 +518,7 @@ namespace Cowboy.Sockets
 
         private void HandleUserSideError(Exception ex)
         {
-            _log.Error(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
+            Log.Error(string.Format("Session [{0}] error occurred in user side [{1}].", this, ex.Message), ex);
         }
 
         #endregion
@@ -617,7 +608,7 @@ namespace Cowboy.Sockets
                 }
                 catch (Exception innnerException)
                 {
-                    _log.Error(innnerException.Message, innnerException);
+                    Log.Error(innnerException.Message, innnerException);
                 }
             }
         }

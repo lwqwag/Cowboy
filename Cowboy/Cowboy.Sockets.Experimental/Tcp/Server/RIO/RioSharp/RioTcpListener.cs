@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading;
+using Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp;
 
 namespace RioSharp
 {

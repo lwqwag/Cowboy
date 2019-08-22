@@ -9,9 +9,9 @@ namespace Cowboy.CommandLines
     /// </summary>
     public static class CommandLineParser
     {
-        private const char OptionEqualChar = '=';
+        private const char OPTION_EQUAL_CHAR = '=';
         private static readonly char[] OptionStartWithChars = new char[] { '-' };
-        private const string MagicOptionValue = @"!#%&$&*^)&_+*^&&*^$#@*$^%)^^&#$@$#+&(^^$#!";
+        private const string MAGIC_OPTION_VALUE = @"!#%&$&*^)&_+*^&&*^$#@*$^%)^^&#$@$#+&(^^$#!";
 
         /// <summary>
         /// Parses the passed command line arguments and returns the result
@@ -35,15 +35,15 @@ namespace Cowboy.CommandLines
                 {
                     if (IsArgument(token))
                     {
-                        string arg = token.TrimStart(OptionStartWithChars).TrimEnd(OptionEqualChar);
+                        string arg = token.TrimStart(OptionStartWithChars).TrimEnd(OPTION_EQUAL_CHAR);
                         string value = string.Empty;
 
-                        if (arg.Contains(OptionEqualChar))
+                        if (arg.Contains(OPTION_EQUAL_CHAR))
                         {
                             // arg was specified with an '=' sign, so we need
                             // to split the string into the arg and value, but only
                             // if there is no space between the '=' and the arg and value.
-                            string[] r = arg.Split(new char[] { OptionEqualChar }, 2);
+                            string[] r = arg.Split(new char[] { OPTION_EQUAL_CHAR }, 2);
                             if (r.Length == 2)
                             {
                                 arg = r[0];
@@ -79,20 +79,20 @@ namespace Cowboy.CommandLines
                                         // push the token back onto the stack so
                                         // it gets picked up on next pass as an arg
                                         index--;
-                                        value = MagicOptionValue;
+                                        value = MAGIC_OPTION_VALUE;
                                         break;
                                     }
-                                    else if (next != OptionEqualChar.ToString())
+                                    else if (next != OPTION_EQUAL_CHAR.ToString())
                                     {
                                         // save the value (trimming any '=' from the start)
-                                        value = next.TrimStart(OptionEqualChar);
+                                        value = next.TrimStart(OPTION_EQUAL_CHAR);
                                     }
                                 }
                             }
                             else
                             {
                                 index--;
-                                value = MagicOptionValue;
+                                value = MAGIC_OPTION_VALUE;
                                 break;
                             }
                         }
@@ -102,7 +102,7 @@ namespace Cowboy.CommandLines
                             throw new CommandLineException(string.Format(CultureInfo.CurrentCulture,
                               "Option used in invalid context -- {0}", "option with the same argument."));
 
-                        if (value == MagicOptionValue)
+                        if (value == MAGIC_OPTION_VALUE)
                         {
                             cmdOptions.Arguments.Add(arg, string.Empty);
                         }

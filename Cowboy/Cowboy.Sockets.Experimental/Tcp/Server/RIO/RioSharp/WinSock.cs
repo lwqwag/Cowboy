@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 using System.Security;
 using System.Threading;
 
-namespace RioSharp
+namespace Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp
 {
     [StructLayout(LayoutKind.Sequential)]
     internal struct RIO_RESULT

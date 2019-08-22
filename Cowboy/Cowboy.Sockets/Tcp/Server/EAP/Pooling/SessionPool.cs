@@ -10,13 +10,8 @@ namespace Cowboy.Sockets
         public SessionPool(Func<TcpSocketSaeaSession> createSession, Action<TcpSocketSaeaSession> cleanSession)
             : base()
         {
-            if (createSession == null)
-                throw new ArgumentNullException("createSession");
-            if (cleanSession == null)
-                throw new ArgumentNullException("cleanSession");
-
-            _createSession = createSession;
-            _cleanSession = cleanSession;
+            _createSession = createSession ?? throw new ArgumentNullException("createSession");
+            _cleanSession = cleanSession ?? throw new ArgumentNullException("cleanSession");
         }
 
         public SessionPool Initialize(int initialCount = 0)

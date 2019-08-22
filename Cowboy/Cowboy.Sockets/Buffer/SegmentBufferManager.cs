@@ -22,7 +22,7 @@ namespace Cowboy.Buffer
     /// </remarks>
     public class SegmentBufferManager : ISegmentBufferManager
     {
-        private const int TrialsCount = 100;
+        private const int TRIALS_COUNT = 100;
 
         private static SegmentBufferManager _defaultBufferManager;
 
@@ -49,35 +49,18 @@ namespace Cowboy.Buffer
 
         public static void SetDefaultBufferManager(SegmentBufferManager manager)
         {
-            if (manager == null)
-                throw new ArgumentNullException("manager");
-            _defaultBufferManager = manager;
+            _defaultBufferManager = manager ?? throw new ArgumentNullException("manager");
         }
 
-        public int ChunkSize
-        {
-            get { return _chunkSize; }
-        }
+        public int ChunkSize => _chunkSize;
 
-        public int SegmentsCount
-        {
-            get { return _segments.Count; }
-        }
+        public int SegmentsCount => _segments.Count;
 
-        public int SegmentChunksCount
-        {
-            get { return _segmentChunks; }
-        }
+        public int SegmentChunksCount => _segmentChunks;
 
-        public int AvailableBuffers
-        {
-            get { return _buffers.Count; }
-        }
+        public int AvailableBuffers => _buffers.Count;
 
-        public int TotalBufferSize
-        {
-            get { return _segments.Count * _segmentSize; }
-        }
+        public int TotalBufferSize => _segments.Count * _segmentSize;
 
         public SegmentBufferManager(int segmentChunks, int chunkSize)
             : this(segmentChunks, chunkSize, 1) { }
@@ -138,7 +121,7 @@ namespace Cowboy.Buffer
         public ArraySegment<byte> BorrowBuffer()
         {
             int trial = 0;
-            while (trial < TrialsCount)
+            while (trial < TRIALS_COUNT)
             {
                 ArraySegment<byte> result;
                 if (_buffers.TryPop(out result))
@@ -157,7 +140,7 @@ namespace Cowboy.Buffer
 
             try
             {
-                while (trial < TrialsCount)
+                while (trial < TRIALS_COUNT)
                 {
                     ArraySegment<byte> piece;
                     while (totalReceived < count)

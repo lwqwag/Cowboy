@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp;
+using Version = Cowboy.Sockets.Experimental.Tcp.Server.RIO.RioSharp.Version;
 
 namespace RioSharp
 {

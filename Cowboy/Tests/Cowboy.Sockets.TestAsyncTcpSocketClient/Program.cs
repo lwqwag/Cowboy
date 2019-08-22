@@ -29,11 +29,11 @@ namespace Cowboy.Sockets.TestAsyncTcpSocketClient
                 //config.FrameBuilder = new LengthPrefixedFrameBuilder();
                 //config.FrameBuilder = new LengthFieldBasedFrameBuilder();
 
-                IPEndPoint remoteEP = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22222);
-                _client = new AsyncTcpSocketClient(remoteEP, new SimpleEventDispatcher(), config);
+                IPEndPoint remoteEp = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 22222);
+                _client = new AsyncTcpSocketClient(remoteEp, new SimpleEventDispatcher(), config);
                 _client.Connect().Wait();
 
-                Console.WriteLine("TCP client has connected to server [{0}].", remoteEP);
+                Console.WriteLine("TCP client has connected to server [{0}].", remoteEp);
                 Console.WriteLine("Type something to send to server...");
                 while (true)
                 {
@@ -109,7 +109,7 @@ namespace Cowboy.Sockets.TestAsyncTcpSocketClient
                 }
 
                 _client.Shutdown();
-                Console.WriteLine("TCP client has disconnected from server [{0}].", remoteEP);
+                Console.WriteLine("TCP client has disconnected from server [{0}].", remoteEp);
             }
             catch (Exception ex)
             {

@@ -13,16 +13,16 @@ namespace Cowboy.Sockets
     {
         #region Fields
 
-        private static readonly ILog _log = Logger.Get<AsyncTcpSocketServer>();
+        private static readonly ILog Log = Logger.Get<AsyncTcpSocketServer>();
         private TcpListener _listener;
         private readonly ConcurrentDictionary<string, AsyncTcpSocketSession> _sessions = new ConcurrentDictionary<string, AsyncTcpSocketSession>();
         private readonly IAsyncTcpSocketServerEventDispatcher _dispatcher;
         private readonly AsyncTcpSocketServerConfiguration _configuration;
 
         private int _state;
-        private const int _none = 0;
-        private const int _listening = 1;
-        private const int _disposed = 5;
+        private const int NONE = 0;
+        private const int LISTENING = 1;
+        private const int DISPOSED = 5;
 
         #endregion
 
@@ -40,13 +40,8 @@ namespace Cowboy.Sockets
 
         public AsyncTcpSocketServer(IPEndPoint listenedEndPoint, IAsyncTcpSocketServerEventDispatcher dispatcher, AsyncTcpSocketServerConfiguration configuration = null)
         {
-            if (listenedEndPoint == null)
-                throw new ArgumentNullException("listenedEndPoint");
-            if (dispatcher == null)
-                throw new ArgumentNullException("dispatcher");
-
-            this.ListenedEndPoint = listenedEndPoint;
-            _dispatcher = dispatcher;
+            this.ListenedEndPoint = listenedEndPoint ?? throw new ArgumentNullException("listenedEndPoint");
+            _dispatcher = dispatcher ?? throw new ArgumentNullException("dispatcher");
             _configuration = configuration ?? new AsyncTcpSocketServerConfiguration();
 
             if (_configuration.BufferManager == null)
@@ -92,8 +87,8 @@ namespace Cowboy.Sockets
         #region Properties
 
         public IPEndPoint ListenedEndPoint { get; private set; }
-        public bool IsListening { get { return _state == _listening; } }
-        public int SessionCount { get { return _sessions.Count; } }
+        public bool IsListening => _state == LISTENING;
+        public int SessionCount => _sessions.Count;
 
         #endregion
 
@@ -101,12 +96,12 @@ namespace Cowboy.Sockets
 
         public void Listen()
         {
-            int origin = Interlocked.CompareExchange(ref _state, _listening, _none);
-            if (origin == _disposed)
+            int origin = Interlocked.CompareExchange(ref _state, LISTENING, NONE);
+            if (origin == DISPOSED)
             {
                 throw new ObjectDisposedException(GetType().FullName);
             }
-            else if (origin != _none)
+            else if (origin != NONE)
             {
                 throw new InvalidOperationException("This tcp server has already started.");
             }
@@ -130,7 +125,7 @@ namespace Cowboy.Sockets
 
         public void Shutdown()
         {
-            if (Interlocked.Exchange(ref _state, _disposed) == _disposed)
+            if (Interlocked.Exchange(ref _state, DISPOSED) == DISPOSED)
             {
                 return;
             }
@@ -190,7 +185,7 @@ namespace Cowboy.Sockets
             catch (Exception ex) when (!ShouldThrow(ex)) { }
             catch (Exception ex)
             {
-                _log.Error(ex.Message, ex);
+                Log.Error(ex.Message, ex);
             }
         }
 
@@ -200,21 +195,21 @@ namespace Cowboy.Sockets
 
             if (_sessions.TryAdd(session.SessionKey, session))
             {
-                _log.DebugFormat("New session [{0}].", session);
+                Log.DebugFormat("New session [{0}].", session);
                 try
                 {
                     await session.Start();
                 }
                 catch (TimeoutException ex)
                 {
-                    _log.Error(ex.Message, ex);
+                    Log.Error(ex.Message, ex);
                 }
                 finally
                 {
                     AsyncTcpSocketSession throwAway;
                     if (_sessions.TryRemove(session.SessionKey, out throwAway))
                     {
-                        _log.DebugFormat("Close session [{0}].", throwAway);
+                        Log.DebugFormat("Close session [{0}].", throwAway);
                     }
                 }
             }
@@ -250,7 +245,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", sessionKey);
+                Log.WarnFormat("Cannot find session [{0}].", sessionKey);
             }
         }
 
@@ -268,7 +263,7 @@ namespace Cowboy.Sockets
             }
             else
             {
-                _log.WarnFormat("Cannot find session [{0}].", session);
+                Log.WarnFormat("Cannot find session [{0}].", session);
             }
         }
 

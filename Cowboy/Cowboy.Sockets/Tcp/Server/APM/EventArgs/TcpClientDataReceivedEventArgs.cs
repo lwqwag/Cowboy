@@ -1,8 +1,6 @@
-﻿using System;
-
-namespace Cowboy.Sockets
+﻿namespace Cowboy.Sockets.Tcp.Server.APM.EventArgs
 {
-    public class TcpClientDataReceivedEventArgs : EventArgs
+    public class TcpClientDataReceivedEventArgs : System.EventArgs
     {
         public TcpClientDataReceivedEventArgs(TcpSocketSession session, byte[] data)
             : this(session, data, 0, data.Length)

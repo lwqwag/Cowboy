@@ -5,18 +5,15 @@ namespace Cowboy.Sockets
 {
     public class TcpServerConnectedEventArgs : EventArgs
     {
-        public TcpServerConnectedEventArgs(IPEndPoint remoteEP)
-            : this(remoteEP, null)
+        public TcpServerConnectedEventArgs(IPEndPoint remoteEp)
+            : this(remoteEp, null)
         {
         }
 
-        public TcpServerConnectedEventArgs(IPEndPoint remoteEP, IPEndPoint localEP)
+        public TcpServerConnectedEventArgs(IPEndPoint remoteEp, IPEndPoint localEp)
         {
-            if (remoteEP == null)
-                throw new ArgumentNullException("remoteEP");
-
-            this.RemoteEndPoint = remoteEP;
-            this.LocalEndPoint = localEP;
+            this.RemoteEndPoint = remoteEp ?? throw new ArgumentNullException("remoteEp");
+            this.LocalEndPoint = localEp;
         }
 
         public IPEndPoint RemoteEndPoint { get; private set; }

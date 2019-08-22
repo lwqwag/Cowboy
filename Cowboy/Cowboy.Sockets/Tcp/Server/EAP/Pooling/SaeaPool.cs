@@ -10,13 +10,8 @@ namespace Cowboy.Sockets
         public SaeaPool(Func<SaeaAwaitable> createSaea, Action<SaeaAwaitable> cleanSaea)
             : base()
         {
-            if (createSaea == null)
-                throw new ArgumentNullException("createSaea");
-            if (cleanSaea == null)
-                throw new ArgumentNullException("cleanSaea");
-
-            _createSaea = createSaea;
-            _cleanSaea = cleanSaea;
+            _createSaea = createSaea ?? throw new ArgumentNullException("createSaea");
+            _cleanSaea = cleanSaea ?? throw new ArgumentNullException("cleanSaea");
         }
 
         public SaeaPool Initialize(int initialCount = 0)

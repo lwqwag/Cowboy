@@ -8,23 +8,17 @@ namespace Cowboy.CommandLines
     /// </summary>
     public class CommandLineOptions
     {
-        private List<string> parameters = new List<string>();
-        private Dictionary<string, string> arguments = new Dictionary<string, string>();
+        private List<string> _parameters = new List<string>();
+        private Dictionary<string, string> _arguments = new Dictionary<string, string>();
 
         /// <summary>
         /// Returns the list of stand-alone parameters.
         /// </summary>
-        public ICollection<string> Parameters
-        {
-            get { return parameters; }
-        }
+        public ICollection<string> Parameters => _parameters;
 
         /// <summary>
         /// Returns the dictionary of argument/value pairs.
         /// </summary>
-        public IDictionary<string, string> Arguments
-        {
-            get { return arguments; }
-        }
+        public IDictionary<string, string> Arguments => _arguments;
     }
 }

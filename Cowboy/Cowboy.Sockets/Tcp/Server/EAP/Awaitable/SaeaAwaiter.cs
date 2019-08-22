@@ -8,7 +8,7 @@ namespace Cowboy.Sockets
 {
     public sealed class SaeaAwaiter : INotifyCompletion
     {
-        private static readonly Action SENTINEL = delegate { };
+        private static readonly Action Sentinel = delegate { };
         private readonly SaeaAwaitable _awaitable;
         private readonly object _syncRoot = new object();
         private SynchronizationContext _syncContext;
@@ -23,7 +23,7 @@ namespace Cowboy.Sockets
 
         private void OnSaeaCompleted(object sender, SocketAsyncEventArgs args)
         {
-            var continuation = _continuation ?? Interlocked.CompareExchange(ref _continuation, SENTINEL, null);
+            var continuation = _continuation ?? Interlocked.CompareExchange(ref _continuation, Sentinel, null);
 
             if (continuation != null)
             {
@@ -33,7 +33,7 @@ namespace Cowboy.Sockets
 
                 this.Complete();
 
-                if (continuation != SENTINEL)
+                if (continuation != Sentinel)
                 {
                     if (syncContext != null)
                         syncContext.Post(s => continuation.Invoke(), null);
@@ -43,15 +43,12 @@ namespace Cowboy.Sockets
             }
         }
 
-        internal object SyncRoot
-        {
-            get { return _syncRoot; }
-        }
+        internal object SyncRoot => _syncRoot;
 
         internal SynchronizationContext SyncContext
         {
-            get { return _syncContext; }
-            set { _syncContext = value; }
+            get => _syncContext;
+            set => _syncContext = value;
         }
 
         public SocketError GetResult()
@@ -61,8 +58,8 @@ namespace Cowboy.Sockets
 
         void INotifyCompletion.OnCompleted(Action continuation)
         {
-            if (_continuation == SENTINEL
-                || Interlocked.CompareExchange(ref _continuation, continuation, null) == SENTINEL)
+            if (_continuation == Sentinel
+                || Interlocked.CompareExchange(ref _continuation, continuation, null) == Sentinel)
             {
                 this.Complete();
 
@@ -77,10 +74,7 @@ namespace Cowboy.Sockets
             }
         }
 
-        public bool IsCompleted
-        {
-            get { return _isCompleted; }
-        }
+        public bool IsCompleted => _isCompleted;
 
         internal void Complete()
         {

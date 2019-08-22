@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Text;
+using Cowboy.Sockets.Tcp.Server.APM;
+using Cowboy.Sockets.Tcp.Server.APM.EventArgs;
 using Logrila.Logging.NLogIntegration;
 
 namespace Cowboy.Sockets.TestTcpSocketServer

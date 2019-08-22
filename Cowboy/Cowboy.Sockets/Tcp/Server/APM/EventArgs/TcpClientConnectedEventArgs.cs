@@ -1,15 +1,12 @@
-﻿ixusing System;
+﻿using System;
 
-namespace Cowboy.Sockets
+namespace Cowboy.Sockets.Tcp.Server.APM.EventArgs
 {
-    public class TcpClientConnectedEventArgs : EventArgs
+    public class TcpClientConnectedEventArgs : System.EventArgs
     {
         public TcpClientConnectedEventArgs(TcpSocketSession session)
         {
-            if (session == null)
-                throw new ArgumentNullException("session");
-
-            this.Session = session;
+            this.Session = session ?? throw new ArgumentNullException("session");
         }
 
         public TcpSocketSession Session { get; private set; }
