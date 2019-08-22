@@ -7,5 +7,6 @@ namespace Cowboy.Sockets
         Task OnServerConnected(AsyncTcpSocketClient client);
         Task OnServerDataReceived(AsyncTcpSocketClient client, byte[] data, int offset, int count);
         Task OnServerDisconnected(AsyncTcpSocketClient client);
+        string LastData { get; }
     }
 }

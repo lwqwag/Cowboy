@@ -8,7 +8,7 @@ namespace Cowboy.Sockets.TestAsyncTcpSocketClient
     {
         public async Task OnServerConnected(AsyncTcpSocketClient client)
         {
-            Console.WriteLine(string.Format("TCP server {0} has connected.", client.RemoteEndPoint));
+            Console.WriteLine($"TCP server {client.RemoteEndPoint} has connected.");
             await Task.CompletedTask;
         }
 
@@ -33,5 +33,7 @@ namespace Cowboy.Sockets.TestAsyncTcpSocketClient
             Console.WriteLine(string.Format("TCP server {0} has disconnected.", client.RemoteEndPoint));
             await Task.CompletedTask;
         }
+
+        public string LastData { get; private set; }
     }
 }

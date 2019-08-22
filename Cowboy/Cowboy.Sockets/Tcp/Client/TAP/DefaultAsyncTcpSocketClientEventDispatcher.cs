@@ -24,6 +24,8 @@ namespace Cowboy.Sockets
             _onServerDisconnected = onServerDisconnected;
         }
 
+        public string LastData => throw new NotImplementedException();
+
         public async Task OnServerConnected(AsyncTcpSocketClient client)
         {
             if (_onServerConnected != null)
